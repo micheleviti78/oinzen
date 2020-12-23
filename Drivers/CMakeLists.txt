@@ -1,0 +1,57 @@
+set (HAL_SOURCES	
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_adc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_adc_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_cortex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_crc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_crc_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dcmi.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dcmi_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma2d.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dsi.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_eth.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_exti.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_gpio.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_hcd.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_ltdc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_ltdc_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_qspi.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rtc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rtc_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_sai.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_sai_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_sd.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_sdram.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_spdifrx.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_spi.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_spi_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart_ex.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_fmc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_sdmmc.c
+	STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_usb.c	
+	)
+	
+add_library(hal STATIC ${HAL_SOURCES})
+
+target_include_directories(hal
+	SYSTEM
+	PUBLIC
+	${CMAKE_SOURCE_DIR}/Drivers/STM32F7xx_HAL_Driver/Inc
+	${CMAKE_SOURCE_DIR}/Drivers/STM32F7xx_HAL_Driver/Inc/Legacy
+	${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F7xx/Include
+	${CMAKE_SOURCE_DIR}/Drivers/CMSIS/Include
+	${PROJECT_CONFIG_DIR}
+	)
