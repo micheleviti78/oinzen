@@ -2,3 +2,5 @@
 .cproject
 cmake/toolchain.cmake
 build/
+.autotools
+.settings/
