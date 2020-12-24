@@ -1,0 +1,57 @@
+set (HAL_SOURCES	
+	Src/stm32f7xx_hal_adc.c
+	Src/stm32f7xx_hal_adc_ex.c
+	Src/stm32f7xx_hal.c
+	Src/stm32f7xx_hal_cortex.c
+	Src/stm32f7xx_hal_crc.c
+	Src/stm32f7xx_hal_crc_ex.c
+	Src/stm32f7xx_hal_dcmi.c
+	Src/stm32f7xx_hal_dcmi_ex.c
+	Src/stm32f7xx_hal_dma2d.c
+	Src/stm32f7xx_hal_dma.c
+	Src/stm32f7xx_hal_dma_ex.c
+	Src/stm32f7xx_hal_dsi.c
+	Src/stm32f7xx_hal_eth.c
+	Src/stm32f7xx_hal_exti.c
+	Src/stm32f7xx_hal_flash.c
+	Src/stm32f7xx_hal_flash_ex.c
+	Src/stm32f7xx_hal_gpio.c
+	Src/stm32f7xx_hal_hcd.c
+	Src/stm32f7xx_hal_i2c.c
+	Src/stm32f7xx_hal_i2c_ex.c
+	Src/stm32f7xx_hal_ltdc.c
+	Src/stm32f7xx_hal_ltdc_ex.c
+	Src/stm32f7xx_hal_pwr.c
+	Src/stm32f7xx_hal_pwr_ex.c
+	Src/stm32f7xx_hal_qspi.c
+	Src/stm32f7xx_hal_rcc.c
+	Src/stm32f7xx_hal_rcc_ex.c
+	Src/stm32f7xx_hal_rtc.c
+	Src/stm32f7xx_hal_rtc_ex.c
+	Src/stm32f7xx_hal_sai.c
+	Src/stm32f7xx_hal_sai_ex.c
+	Src/stm32f7xx_hal_sd.c
+	Src/stm32f7xx_hal_sdram.c
+	Src/stm32f7xx_hal_spdifrx.c
+	Src/stm32f7xx_hal_spi.c
+	Src/stm32f7xx_hal_spi_ex.c
+	Src/stm32f7xx_hal_tim.c
+	Src/stm32f7xx_hal_tim_ex.c
+	Src/stm32f7xx_hal_uart.c
+	Src/stm32f7xx_hal_uart_ex.c
+	Src/stm32f7xx_ll_fmc.c
+	Src/stm32f7xx_ll_sdmmc.c
+	Src/stm32f7xx_ll_usb.c	
+	)
+	
+add_library(hal STATIC ${HAL_SOURCES})
+
+target_include_directories(hal
+	SYSTEM
+	PUBLIC
+	${CMAKE_SOURCE_DIR}/lib/STM32F7xx_HAL_Driver/Inc
+	${CMAKE_SOURCE_DIR}/lib/STM32F7xx_HAL_Driver/Inc/Legacy
+	${CMAKE_SOURCE_DIR}/lib/CMSIS/Device/ST/STM32F7xx/Include
+	${CMAKE_SOURCE_DIR}/lib/CMSIS/Include
+	${PROJECT_CONFIG_DIR}
+	)

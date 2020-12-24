@@ -14,7 +14,7 @@ endif()
 
 set(LDSCRIPT ${CMAKE_SOURCE_DIR}/STM32F746NGHx_FLASH.ld)
 
-set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/Core/Inc/conf)
+set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/core/Inc/conf)
 
 enable_language(C CXX ASM)
 
@@ -35,23 +35,23 @@ set(LINK_FLAGS "${ARM_LINK_FLAGS} -Wl,--gc-sections -Wl,--undefined=uxTopUsedPri
 
 set(CMAKE_EXE_LINKER_FLAGS "${LINK_FLAGS} -specs=${LDSPECS} -T${LDSCRIPT}")
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/Drivers)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/STM32F7xx_HAL_Driver/)
 
 set(FLASH_ADDRESS 0x8000000)
 
-set(STARTUP_SOURCE ${CMAKE_SOURCE_DIR}/Boot/startup_stm32f746xx.s)
+set(STARTUP_SOURCE ${CMAKE_SOURCE_DIR}/boot/startup_stm32f746xx.s)
 
 set(COMMON_SOURCE 
-	${CMAKE_SOURCE_DIR}/Core/Src/app/main.c  
-	${CMAKE_SOURCE_DIR}/Core/Src/hw/stm32f7xx_hal_msp.c  
-	${CMAKE_SOURCE_DIR}/Core/Src/hw/stm32f7xx_it.c
-	${CMAKE_SOURCE_DIR}/Core/Src/hw/system_stm32f7xx.c  
-	${CMAKE_SOURCE_DIR}/Core/Src/system/syscalls.c  
+	${CMAKE_SOURCE_DIR}/core/Src/app/main.c  
+	${CMAKE_SOURCE_DIR}/core/Src/hw/stm32f7xx_hal_msp.c  
+	${CMAKE_SOURCE_DIR}/core/Src/hw/stm32f7xx_it.c
+	${CMAKE_SOURCE_DIR}/core/Src/hw/system_stm32f7xx.c  
+	${CMAKE_SOURCE_DIR}/core/Src/system/syscalls.c  
 	)
 		
 add_executable(${PROJECT_NAME} ${COMMON_SOURCE} ${STARTUP_SOURCE})
 		
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/Core/Inc/app ${CMAKE_SOURCE_DIR}/Core/Inc/conf ${CMAKE_SOURCE_DIR}/Core/Inc/hw)	
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/core/Inc/app ${CMAKE_SOURCE_DIR}/core/Inc/conf ${CMAKE_SOURCE_DIR}/core/Inc/hw)	
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 
