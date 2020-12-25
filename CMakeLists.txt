@@ -48,16 +48,18 @@ set(COMMON_SOURCE
 	${CMAKE_SOURCE_DIR}/core/src/hw/stm32f7xx_hal_msp.c  
 	${CMAKE_SOURCE_DIR}/core/src/hw/stm32f7xx_it.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/system_stm32f7xx.c  
-	${CMAKE_SOURCE_DIR}/core/src/system/syscalls.c  
+	${CMAKE_SOURCE_DIR}/core/src/system/syscalls.c
+	${CMAKE_SOURCE_DIR}/core/src/util/diag.c
 	)
 		
 add_executable(${PROJECT_NAME} ${COMMON_SOURCE} ${STARTUP_SOURCE})
 		
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/core/include/app ${CMAKE_SOURCE_DIR}/core/include/conf ${CMAKE_SOURCE_DIR}/core/include/hw)	
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/core/include/app ${CMAKE_SOURCE_DIR}/core/include/conf ${CMAKE_SOURCE_DIR}/core/include/hw ${CMAKE_SOURCE_DIR}/core/include/util)	
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 
 target_link_libraries(${PROJECT_NAME} hal)
+target_link_libraries(${PROJECT_NAME} printf)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${ARM_SIZE_UTIL} ${PROJECT_NAME}.elf
@@ -67,7 +69,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_target(flash_ocd)
 add_custom_command(
     TARGET flash_ocd
-    COMMAND ${OPENOCD} -f board/st_nucleo_f4.cfg -c "program ${PROJECT_NAME}.bin reset exit ${FLASH_ADDRESS}"
+    COMMAND ${OPENOCD} -f board/stm32f746g-disco.cfg -c "program ${PROJECT_NAME}.bin reset exit ${FLASH_ADDRESS}"
  	)
 
 add_custom_target(flash)

@@ -5,7 +5,7 @@
 //===========================================================================
 //===========================================================================
 //
-// oinzen project
+// oinzen project Dec. 2020
 //
 //===========================================================================
 //===========================================================================
@@ -15,6 +15,7 @@
 //===========================================================================*/
 
 /* Includes ------------------------------------------------------------------*/
+#include "diag.h"
 #include "main.h"
 
 UART_HandleTypeDef huart1;
@@ -46,6 +47,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+
+  RAW_DIAG("Starting System");
 
   /* Infinite loop */
   while (1)
@@ -644,6 +647,10 @@ static void MX_GPIO_Init(void)
   */
 void Error_Handler(void)
 {}
+
+void _putchar(char ch){
+	 HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+}
 
 #ifdef  USE_FULL_ASSERT
 /**
