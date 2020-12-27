@@ -35,6 +35,8 @@ set(LINK_FLAGS "${ARM_LINK_FLAGS} -Wl,--gc-sections -Wl,--undefined=uxTopUsedPri
 
 set(CMAKE_EXE_LINKER_FLAGS "${LINK_FLAGS} -specs=${LDSPECS} -T${LDSCRIPT}")
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/FreeRTOS)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/CMSIS/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/hal/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/printf/)
 
@@ -58,6 +60,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/core/inclu
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 
+target_link_libraries(${PROJECT_NAME} freertos)
+target_link_libraries(${PROJECT_NAME} cmsis)
 target_link_libraries(${PROJECT_NAME} hal)
 target_link_libraries(${PROJECT_NAME} printf)
 

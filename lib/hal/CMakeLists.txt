@@ -46,6 +46,8 @@ set (HAL_SOURCES
 	
 add_library(hal STATIC ${HAL_SOURCES})
 
+target_link_libraries(hal cmsis)
+
 target_include_directories(hal
 	SYSTEM
 	PUBLIC
