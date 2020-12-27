@@ -51,8 +51,8 @@ target_link_libraries(hal cmsis)
 target_include_directories(hal
 	SYSTEM
 	PUBLIC
-	${CMAKE_SOURCE_DIR}/lib/hal/include
-	${CMAKE_SOURCE_DIR}/lib/hal/include/Legacy
+	${CMAKE_SOURCE_DIR}/lib/HAL/include
+	${CMAKE_SOURCE_DIR}/lib/HAL/include/Legacy
 	${CMAKE_SOURCE_DIR}/lib/CMSIS/Device/ST/STM32F7xx/Include
 	${CMAKE_SOURCE_DIR}/lib/CMSIS/Include
 	${PROJECT_CONFIG_DIR}

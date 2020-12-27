@@ -39,7 +39,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${LINK_FLAGS} -specs=${LDSPECS} -T${LDSCRIPT}")
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/FreeRTOS)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/CMSIS/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/LwIP/)
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/hal/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/HAL/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/printf/)
 
 set(FLASH_ADDRESS 0x8000000)
