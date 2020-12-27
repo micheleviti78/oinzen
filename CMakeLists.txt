@@ -31,15 +31,16 @@ set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 
 string(REPLACE ";" " " ARM_LINK_FLAGS "${ARM_FLAGS}")
 
-set(LINK_FLAGS "${ARM_LINK_FLAGS} -Wl,--gc-sections -Wl,--undefined=uxTopUsedPriority,--undefined=freeRTOSMemoryScheme -Wl,-Map=${PROJECT_NAME}.map,--cref")
+#set(LINK_FLAGS "${ARM_LINK_FLAGS} -Wl,--gc-sections -Wl,--undefined=uxTopUsedPriority,--undefined=freeRTOSMemoryScheme -Wl,-Map=${PROJECT_NAME}.map,--cref")
+set(LINK_FLAGS "${ARM_LINK_FLAGS} -Wl,--gc-sections -Wl,-Map=${PROJECT_NAME}.map,--cref")
 
 set(CMAKE_EXE_LINKER_FLAGS "${LINK_FLAGS} -specs=${LDSPECS} -T${LDSCRIPT}")
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/FreeRTOS)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/CMSIS/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/LwIP/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/hal/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/printf/)
-
 
 set(FLASH_ADDRESS 0x8000000)
 
@@ -55,13 +56,18 @@ set(COMMON_SOURCE
 	)
 		
 add_executable(${PROJECT_NAME} ${COMMON_SOURCE} ${STARTUP_SOURCE})
-		
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/core/include/app ${CMAKE_SOURCE_DIR}/core/include/conf ${CMAKE_SOURCE_DIR}/core/include/hw ${CMAKE_SOURCE_DIR}/core/include/util)	
+
+target_include_directories(${PROJECT_NAME} PUBLIC 
+${CMAKE_SOURCE_DIR}/core/include/app 
+${CMAKE_SOURCE_DIR}/core/include/conf 
+${CMAKE_SOURCE_DIR}/core/include/hw 
+${CMAKE_SOURCE_DIR}/core/include/util)	
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_DEPENDS ${LDSCRIPT})
 
 target_link_libraries(${PROJECT_NAME} freertos)
 target_link_libraries(${PROJECT_NAME} cmsis)
+target_link_libraries(${PROJECT_NAME} lwip) 
 target_link_libraries(${PROJECT_NAME} hal)
 target_link_libraries(${PROJECT_NAME} printf)
 
