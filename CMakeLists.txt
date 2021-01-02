@@ -52,7 +52,7 @@ set(COMMON_SOURCE
 	${CMAKE_SOURCE_DIR}/core/src/app/main.c
 	#${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
-	#${CMAKE_SOURCE_DIR}/core/src/hw/hal_timer.c
+	${CMAKE_SOURCE_DIR}/core/src/hw/hal_timer.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/interrupts.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/system.c
 	${CMAKE_SOURCE_DIR}/core/src/system/syscalls.c
