@@ -47,10 +47,14 @@ set(FLASH_ADDRESS 0x8000000)
 set(STARTUP_SOURCE ${CMAKE_SOURCE_DIR}/boot/startup_stm32f746xx.s)
 
 set(COMMON_SOURCE 
-	${CMAKE_SOURCE_DIR}/core/src/app/main.c  
-	${CMAKE_SOURCE_DIR}/core/src/hw/stm32f7xx_hal_msp.c  
-	${CMAKE_SOURCE_DIR}/core/src/hw/stm32f7xx_it.c
-	${CMAKE_SOURCE_DIR}/core/src/hw/system_stm32f7xx.c  
+	#${CMAKE_SOURCE_DIR}/core/src/app/freertos.c
+	#${CMAKE_SOURCE_DIR}/core/src/app/lwip.c
+	${CMAKE_SOURCE_DIR}/core/src/app/main.c
+	#${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
+	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
+	#${CMAKE_SOURCE_DIR}/core/src/hw/hal_timer.c
+	${CMAKE_SOURCE_DIR}/core/src/hw/interrupts.c
+	${CMAKE_SOURCE_DIR}/core/src/hw/system.c
 	${CMAKE_SOURCE_DIR}/core/src/system/syscalls.c
 	${CMAKE_SOURCE_DIR}/core/src/util/diag.c
 	)
