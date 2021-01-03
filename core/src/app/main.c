@@ -17,13 +17,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "diag.h"
 #include "main.h"
+#include "cmsis_os.h"
+#include "lwip.h"
 
 UART_HandleTypeDef huart1;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void StartDefaultTask(void const * argument);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+osThreadId defaultTaskHandle;
 /**
   * @brief  The application entry point.
   * @retval int
@@ -48,11 +52,39 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
 
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  RAW_DIAG(" ");
   RAW_DIAG("Starting System");
+
+  osKernelStart();
 
   /* Infinite loop */
   while (1)
   {}
+}
+
+enum DCHP{ASSIGNED, NOT_ASSIGNED};
+
+void StartDefaultTask(void const * argument)
+{
+	/* init code for LWIP */
+
+	enum DCHP dhcp_status = NOT_ASSIGNED;
+
+	MX_LWIP_Init();
+
+	/* Infinite loop */
+	for(;;){
+		osDelay(1000);
+		if (ip_assigned() && dhcp_status == NOT_ASSIGNED) {
+			dhcp_status = ASSIGNED;
+			uint8_t iptxt[20];
+			get_ip((char *)iptxt);
+			RAW_DIAG("IP address assigned by a DHCP server: %s", iptxt);
+		}
+	}
 }
 
 /**

@@ -18,6 +18,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "diag.h"
 #include "main.h"
 #include "lwip/opt.h"
 
@@ -74,9 +75,6 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef* ethHandle)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(ethHandle->Instance==ETH)
   {
-  /* USER CODE BEGIN ETH_MspInit 0 */
-
-  /* USER CODE END ETH_MspInit 0 */
     /* Enable Peripheral clock */
     __HAL_RCC_ETH_CLK_ENABLE();
 
@@ -116,11 +114,8 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef* ethHandle)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* Peripheral interrupt init */
-    HAL_NVIC_SetPriority(ETH_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(ETH_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(ETH_IRQn);
-  /* USER CODE BEGIN ETH_MspInit 1 */
-
-  /* USER CODE END ETH_MspInit 1 */
   }
 }
 
@@ -128,9 +123,6 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* ethHandle)
 {
   if(ethHandle->Instance==ETH)
   {
-  /* USER CODE BEGIN ETH_MspDeInit 0 */
-
-  /* USER CODE END ETH_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_ETH_CLK_DISABLE();
 
@@ -153,10 +145,6 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* ethHandle)
 
     /* Peripheral interrupt Deinit*/
     HAL_NVIC_DisableIRQ(ETH_IRQn);
-
-  /* USER CODE BEGIN ETH_MspDeInit 1 */
-
-  /* USER CODE END ETH_MspDeInit 1 */
   }
 }
 
@@ -202,16 +190,13 @@ static void low_level_init(struct netif *netif)
   heth.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
   heth.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
 
-  /* USER CODE BEGIN MACADDRESS */
-
-  /* USER CODE END MACADDRESS */
-
   hal_eth_init_status = HAL_ETH_Init(&heth);
 
   if (hal_eth_init_status == HAL_OK)
   {
     /* Set netif link flag */
     netif->flags |= NETIF_FLAG_LINK_UP;
+    RAW_DIAG("Ethernet hardware initialized");
   }
   /* Initialize Tx Descriptors list: Chain Mode */
   HAL_ETH_DMATxDescListInit(&heth, DMATxDscrTab, &Tx_Buff[0][0], ETH_TXBUFNB);
@@ -255,9 +240,7 @@ static void low_level_init(struct netif *netif)
   /* Enable MAC and DMA transmission and reception */
   HAL_ETH_Start(&heth);
 
-/* USER CODE BEGIN PHY_PRE_CONFIG */
-
-/* USER CODE END PHY_PRE_CONFIG */
+  RAW_DIAG("DMA and MAC transmission and reception enabled");
 
   /* Read Register Configuration */
   HAL_ETH_ReadPHYRegister(&heth, PHY_ISFR, &regvalue);
@@ -269,15 +252,7 @@ static void low_level_init(struct netif *netif)
   /* Read Register Configuration */
   HAL_ETH_ReadPHYRegister(&heth, PHY_ISFR , &regvalue);
 
-/* USER CODE BEGIN PHY_POST_CONFIG */
-
-/* USER CODE END PHY_POST_CONFIG */
-
 #endif /* LWIP_ARP || LWIP_ETHERNET */
-
-/* USER CODE BEGIN LOW_LEVEL_INIT */
-
-/* USER CODE END LOW_LEVEL_INIT */
 }
 
 /**

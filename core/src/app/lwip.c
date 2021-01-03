@@ -22,11 +22,10 @@
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "ethernetif.h"
+#include "diag.h"
 
 /* Private function prototypes -----------------------------------------------*/
 /* ETH Variables initialization ----------------------------------------------*/
-
-//void Error_Handler(void);
 
 /* Semaphore to signal Ethernet Link state update */
 osSemaphoreId Netif_LinkSemaphore = NULL;
@@ -44,7 +43,7 @@ ip4_addr_t gw;
   */
 void MX_LWIP_Init(void)
 {
-  /* Initilialize the LwIP stack with RTOS */
+  /* Initialize the LwIP stack with RTOS */
   tcpip_init( NULL, NULL );
 
   /* IP addresses initialization with DHCP (IPv4) */
@@ -62,11 +61,13 @@ void MX_LWIP_Init(void)
   {
     /* When the netif is fully configured this function must be called */
     netif_set_up(&gnetif);
+    RAW_DIAG("Link up");
   }
   else
   {
     /* When the netif link is down this function must be called */
     netif_set_down(&gnetif);
+    RAW_DIAG("Link down");
   }
 
   /* Set the link callback function, this function is called on change of link status*/
@@ -85,7 +86,17 @@ void MX_LWIP_Init(void)
 /* USER CODE END OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
 
   /* Start DHCP negotiation for a network interface (IPv4) */
-  dhcp_start(&gnetif);
+  err_t err = dhcp_start(&gnetif);
+  if (err) RAW_DIAG("Error while starting DHCP");
+  else RAW_DIAG("DHCP started");
+}
+
+uint8_t ip_assigned(){
+	return dhcp_supplied_address(&gnetif);
+}
+
+void get_ip(const char* ip){
+	sprintf((char *)ip, "%s", ip4addr_ntoa((const ip4_addr_t *)&gnetif.ip_addr));
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
