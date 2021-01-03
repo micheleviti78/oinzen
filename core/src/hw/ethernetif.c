@@ -170,7 +170,6 @@ void HAL_ETH_RxCpltCallback(ETH_HandleTypeDef *heth)
  */
 static void low_level_init(struct netif *netif)
 {
-  uint32_t regvalue = 0;
   HAL_StatusTypeDef hal_eth_init_status;
 
 /* Init ETH */
@@ -196,7 +195,6 @@ static void low_level_init(struct netif *netif)
   {
     /* Set netif link flag */
     netif->flags |= NETIF_FLAG_LINK_UP;
-    RAW_DIAG("Ethernet hardware initialized");
   }
   /* Initialize Tx Descriptors list: Chain Mode */
   HAL_ETH_DMATxDescListInit(&heth, DMATxDscrTab, &Tx_Buff[0][0], ETH_TXBUFNB);
@@ -241,17 +239,6 @@ static void low_level_init(struct netif *netif)
   HAL_ETH_Start(&heth);
 
   RAW_DIAG("DMA and MAC transmission and reception enabled");
-
-  /* Read Register Configuration */
-  HAL_ETH_ReadPHYRegister(&heth, PHY_ISFR, &regvalue);
-  regvalue |= (PHY_ISFR_INT4);
-
-  /* Enable Interrupt on change of link status */
-  HAL_ETH_WritePHYRegister(&heth, PHY_ISFR , regvalue );
-
-  /* Read Register Configuration */
-  HAL_ETH_ReadPHYRegister(&heth, PHY_ISFR , &regvalue);
-
 #endif /* LWIP_ARP || LWIP_ETHERNET */
 }
 
@@ -561,45 +548,23 @@ u32_t sys_now(void)
 }
 
 /**
-  * @brief  This function sets the netif link status.
-  * @param  netif: the network interface
-  * @retval None
-  */
-void ethernetif_set_link(void const *argument)
+ * @brief This function returns the status of the phy link
+ * @param None
+ * @retval phy link status bit
+ */
 
-{
-  uint32_t regvalue = 0;
-  struct link_str *link_arg = (struct link_str *)argument;
-
-  for(;;)
-  {
-    /* Read PHY_BSR*/
-    HAL_ETH_ReadPHYRegister(&heth, PHY_BSR, &regvalue);
-
-    regvalue &= PHY_LINKED_STATUS;
-
-    /* Check whether the netif link down and the PHY link is up */
-    if(!netif_is_link_up(link_arg->netif) && (regvalue))
-    {
-      /* network cable is connected */
-      netif_set_link_up(link_arg->netif);
-    }
-    else if(netif_is_link_up(link_arg->netif) && (!regvalue))
-    {
-      /* network cable is dis-connected */
-      netif_set_link_down(link_arg->netif);
-    }
-
-    /* Suspend thread for 200 ms */
-    osDelay(200);
-  }
+uint32_t ethernetif_phy_link_status_bit(void){
+	uint32_t regvalue = 0;
+	HAL_ETH_ReadPHYRegister(&heth, PHY_BSR, &regvalue);
+	regvalue &= PHY_LINKED_STATUS;
+	return regvalue;
 }
 
 #if LWIP_NETIF_LINK_CALLBACK
 /**
   * @brief  Link callback function, this function is called on change of link status
   *         to update low level driver configuration.
-* @param  netif: The network interface
+  * @param  netif: The network interface
   * @retval None
   */
 void ethernetif_update_config(struct netif *netif)
@@ -609,6 +574,7 @@ void ethernetif_update_config(struct netif *netif)
 
   if(netif_is_link_up(netif))
   {
+	HAL_ETH_Stop(&heth);
     /* Restart the auto-negotiation */
     if(heth.Init.AutoNegotiation != ETH_AUTONEGOTIATION_DISABLE)
     {

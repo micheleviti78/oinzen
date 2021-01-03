@@ -65,25 +65,15 @@ int main(void)
   {}
 }
 
-enum DCHP{ASSIGNED, NOT_ASSIGNED};
-
 void StartDefaultTask(void const * argument)
 {
 	/* init code for LWIP */
-
-	enum DCHP dhcp_status = NOT_ASSIGNED;
 
 	MX_LWIP_Init();
 
 	/* Infinite loop */
 	for(;;){
 		osDelay(1000);
-		if (ip_assigned() && dhcp_status == NOT_ASSIGNED) {
-			dhcp_status = ASSIGNED;
-			uint8_t iptxt[20];
-			get_ip((char *)iptxt);
-			RAW_DIAG("IP address assigned by a DHCP server: %s", iptxt);
-		}
 	}
 }
 

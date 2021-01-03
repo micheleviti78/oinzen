@@ -41,8 +41,6 @@
 
 /* LWIP init function */
 void MX_LWIP_Init(void);
-uint8_t ip_assigned(void);
-void get_ip(const char* ip);
 
 #if !WITH_RTOS
 /* Function defined in lwip.c to:

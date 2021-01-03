@@ -24,8 +24,28 @@
 #include "ethernetif.h"
 #include "diag.h"
 
-/* Private function prototypes -----------------------------------------------*/
-/* ETH Variables initialization ----------------------------------------------*/
+/*Static IP ADDRESS*/
+#define IP_ADDR0   192
+#define IP_ADDR1   168
+#define IP_ADDR2   0
+#define IP_ADDR3   10
+
+/*NETMASK*/
+#define NETMASK_ADDR0   255
+#define NETMASK_ADDR1   255
+#define NETMASK_ADDR2   255
+#define NETMASK_ADDR3   0
+
+/*Gateway Address*/
+#define GW_ADDR0   192
+#define GW_ADDR1   168
+#define GW_ADDR2   0
+#define GW_ADDR3   1
+
+#define MAX_DHCP_TRIES 250
+
+enum DCHP_LINK_STATUS{NOT_INITIALIZED, LINK_UP_WAITING_DHCP, LINK_UP_IP_ACQUIRED, LINK_UP_DHCP_ERROR, LINK_DOWN, LINK_DOWN_INIT};
+static enum DCHP_LINK_STATUS dhcp_link_status = NOT_INITIALIZED;
 
 /* Semaphore to signal Ethernet Link state update */
 osSemaphoreId Netif_LinkSemaphore = NULL;
@@ -61,13 +81,21 @@ void MX_LWIP_Init(void)
   {
     /* When the netif is fully configured this function must be called */
     netif_set_up(&gnetif);
+    err_t err = dhcp_start(&gnetif);
+    if (err) {
+    	dhcp_link_status = LINK_UP_DHCP_ERROR;
+    }
+    else{
+    	dhcp_link_status = LINK_UP_WAITING_DHCP;
+    }
     RAW_DIAG("Link up");
   }
   else
   {
     /* When the netif link is down this function must be called */
     netif_set_down(&gnetif);
-    RAW_DIAG("Link down");
+    dhcp_link_status = LINK_DOWN_INIT;
+	RAW_DIAG("Link down");
   }
 
   /* Set the link callback function, this function is called on change of link status*/
@@ -84,19 +112,112 @@ void MX_LWIP_Init(void)
   osThreadDef(LinkThr, ethernetif_set_link, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(LinkThr), &link_arg);
 /* USER CODE END OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
-
-  /* Start DHCP negotiation for a network interface (IPv4) */
-  err_t err = dhcp_start(&gnetif);
-  if (err) RAW_DIAG("Error while starting DHCP");
-  else RAW_DIAG("DHCP started");
 }
 
-uint8_t ip_assigned(){
-	return dhcp_supplied_address(&gnetif);
-}
+/**
+  * @brief  This function sets the netif link status.
+  * @param  netif: the network interface
+  * @retval None
+  */
+void ethernetif_set_link(void const *argument)
+{
+  uint32_t regvalue = 0;
+  struct link_str *link_arg = (struct link_str *)argument;
 
-void get_ip(const char* ip){
-	sprintf((char *)ip, "%s", ip4addr_ntoa((const ip4_addr_t *)&gnetif.ip_addr));
+  for(;;)
+  {
+	  switch(dhcp_link_status){
+	  case NOT_INITIALIZED:
+		  break;
+	  case LINK_UP_WAITING_DHCP:
+		  regvalue = ethernetif_phy_link_status_bit();
+		  if(netif_is_link_up(link_arg->netif) && (!regvalue)){
+			  dhcp_stop(&gnetif);
+			  netif_set_link_down(link_arg->netif);
+			  dhcp_link_status = LINK_DOWN;
+			  RAW_DIAG("Link down");
+			  break;
+		  }
+		  if (dhcp_supplied_address(&gnetif)) {
+			  uint8_t iptxt[20];
+			  sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&gnetif.ip_addr));
+			  RAW_DIAG("IP address assigned by a DHCP server: %s", iptxt);
+			  dhcp_link_status = LINK_UP_IP_ACQUIRED;
+			  break;
+		  }
+		  struct dhcp *dhcp = (struct dhcp *)netif_get_client_data(&gnetif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
+		  if (dhcp->tries > MAX_DHCP_TRIES){
+			  dhcp_stop(&gnetif);
+			  dhcp_link_status = LINK_UP_DHCP_ERROR;
+			  break;
+		  }
+		  break;
+	  case LINK_UP_IP_ACQUIRED:
+		  regvalue = ethernetif_phy_link_status_bit();
+		  if(netif_is_link_up(link_arg->netif) && (!regvalue)){
+			  dhcp_stop(&gnetif);
+			  netif_set_link_down(link_arg->netif);
+			  dhcp_link_status = LINK_DOWN;
+			  RAW_DIAG("Link down");
+		  }
+		  break;
+	  case LINK_UP_DHCP_ERROR:
+		  regvalue = ethernetif_phy_link_status_bit();
+		  if(netif_is_link_up(link_arg->netif) && (!regvalue)){
+			  dhcp_stop(&gnetif);
+			  netif_set_link_down(link_arg->netif);
+			  dhcp_link_status = LINK_DOWN;
+			  RAW_DIAG("Link down");
+			  break;
+		  }
+		  dhcp_stop(&gnetif);
+
+		  /* Static address used */
+		  IP_ADDR4(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
+		  IP_ADDR4(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+		  IP_ADDR4(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+		  netif_set_addr(&gnetif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask), ip_2_ip4(&gw));
+
+		  uint8_t iptxt[20];
+		  sprintf((char *)iptxt, "%s", ip4addr_ntoa((const ip4_addr_t *)&gnetif.ip_addr));
+		  RAW_DIAG("DHCP error and/or timeout !!");
+		  RAW_DIAG("Static IP address: %s\n", iptxt);
+		  dhcp_link_status = LINK_UP_IP_ACQUIRED;
+		  break;
+	  case LINK_DOWN:
+		  regvalue = ethernetif_phy_link_status_bit();
+		  if(!netif_is_link_up(link_arg->netif) && (regvalue)){
+			  netif_set_link_up(link_arg->netif);
+			  err_t err = dhcp_start(&gnetif);
+			  if (err) {
+				  dhcp_link_status = LINK_UP_DHCP_ERROR;
+			  }
+			  else{
+				  dhcp_link_status = LINK_UP_WAITING_DHCP;
+			  }
+			  RAW_DIAG("Link up");
+			  break;
+		  }
+		  break;
+	  case LINK_DOWN_INIT:
+		  regvalue = ethernetif_phy_link_status_bit();
+		  if(regvalue){
+			  netif_set_up(&gnetif);
+			  netif_set_link_up(link_arg->netif);
+			  err_t err = dhcp_start(&gnetif);
+			  if (err) {
+				  dhcp_link_status = LINK_UP_DHCP_ERROR;
+			  }
+			  else{
+				  dhcp_link_status = LINK_UP_WAITING_DHCP;
+			  }
+			  RAW_DIAG("Link up");
+			  break;
+		  }
+		  break;
+	  }
+    osDelay(1000);
+  }
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
