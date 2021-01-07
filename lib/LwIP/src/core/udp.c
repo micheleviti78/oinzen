@@ -86,7 +86,7 @@ struct udp_pcb *udp_pcbs;
 void
 udp_init(void)
 {
-#ifdef LWIP_RAND
+#if LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS && LWIP_RAND
   udp_port = UDP_ENSURE_LOCAL_PORT_RANGE(LWIP_RAND());
 #endif /* LWIP_RAND */
 }

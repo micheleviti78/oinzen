@@ -109,6 +109,8 @@
 #define CHECKSUM_CHECK_ICMP 0
 /*----- Value in opt.h for CHECKSUM_CHECK_ICMP6: 1 -----*/
 #define CHECKSUM_CHECK_ICMP6 0
+ /*----- ID not random generated -----*/
+#define DHCP_CREATE_RAND_XID 0
 /*-----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
 
