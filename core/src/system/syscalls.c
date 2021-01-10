@@ -56,11 +56,12 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
+#include "diag.h"
 
 /* Variables */
 //#undef errno
 extern int errno;
-extern int __io_putchar(int ch) __attribute__((weak));
+extern void _putchar(char ch);
 extern int __io_getchar(void) __attribute__((weak));
 
 register char * stack_ptr asm("sp");
@@ -88,6 +89,7 @@ int _kill(int pid, int sig)
 void _exit (int status)
 {
 	_kill(status, -1);
+	RAW_DIAG("exit");
 	while (1) {}		/* Make sure we hang here */
 }
 
@@ -103,45 +105,21 @@ __attribute__((weak)) int _read(int file, char *ptr, int len)
 return len;
 }
 
-__attribute__((weak)) int _write(int file, char *ptr, int len)
+int _write(int file, char *ptr, int len)
 {
 	int DataIdx;
 
 	for (DataIdx = 0; DataIdx < len; DataIdx++)
 	{
-		__io_putchar(*ptr++);
+		_putchar(*ptr++);
 	}
 	return len;
-}
-
-caddr_t _sbrk(int incr)
-{
-	extern char end asm("end");
-	static char *heap_end;
-	char *prev_heap_end;
-
-	if (heap_end == 0)
-		heap_end = &end;
-
-	prev_heap_end = heap_end;
-	if (heap_end + incr > stack_ptr)
-	{
-//		write(1, "Heap and stack collision\n", 25);
-//		abort();
-		errno = ENOMEM;
-		return (caddr_t) -1;
-	}
-
-	heap_end += incr;
-
-	return (caddr_t) prev_heap_end;
 }
 
 int _close(int file)
 {
 	return -1;
 }
-
 
 int _fstat(int file, struct stat *st)
 {

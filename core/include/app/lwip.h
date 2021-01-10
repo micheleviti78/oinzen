@@ -25,6 +25,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "lwip/init.h"
 #include "lwip/opt.h"
 #include "lwip/mem.h"
 #include "lwip/memp.h"

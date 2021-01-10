@@ -93,6 +93,8 @@
 /* Defaults to size_t for backward compatibility, but can be changed
    if lengths will always be less than the number of bytes in a size_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE         size_t
+#define configUSE_NEWLIB_REENTRANT               1
+#define configISR_STACK_SIZE_WORDS               1024
 /* USER CODE END MESSAGE_BUFFER_LENGTH_TYPE */
 
 /* Co-routine definitions. */

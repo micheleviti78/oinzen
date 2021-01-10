@@ -57,7 +57,9 @@ int main(void)
 
   RAW_DIAG(" ");
   RAW_DIAG("Starting System");
-
+  RAW_DIAG("Newlib version %d.%d.%d", __NEWLIB__,__NEWLIB_MINOR__,__NEWLIB_PATCHLEVEL__);
+  RAW_DIAG("FreeRTOS version %d.%d.%d", tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD);
+  RAW_DIAG("LwIP version %d.%d.%d", LWIP_VERSION_MAJOR, LWIP_VERSION_MINOR, LWIP_VERSION_REVISION);
   osKernelStart();
 
   /* Infinite loop */
