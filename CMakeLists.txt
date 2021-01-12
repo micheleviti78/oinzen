@@ -18,7 +18,7 @@ set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/core/include/conf)
 
 enable_language(C CXX ASM)
 
-set(ARM_FLAGS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard) 
+set(ARM_FLAGS -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -mno-unaligned-access) 
 
 add_compile_options(${ARM_FLAGS})
 add_compile_options(-Wall -Wextra)
@@ -41,6 +41,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/lib/CMSIS/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/LwIP/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/HAL/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/printf/)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/lib/micropython/)
 
 set(FLASH_ADDRESS 0x8000000)
 
@@ -53,6 +54,7 @@ set(COMMON_SOURCE
 	${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_timer.c
+	${CMAKE_SOURCE_DIR}/core/src/hw/init.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/interrupts.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/system.c
 	${CMAKE_SOURCE_DIR}/core/src/system/syscalls.c
@@ -74,6 +76,7 @@ target_link_libraries(${PROJECT_NAME} cmsis)
 target_link_libraries(${PROJECT_NAME} lwip) 
 target_link_libraries(${PROJECT_NAME} hal)
 target_link_libraries(${PROJECT_NAME} printf)
+#target_link_libraries(${PROJECT_NAME} upy)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${ARM_SIZE_UTIL} ${PROJECT_NAME}.elf
