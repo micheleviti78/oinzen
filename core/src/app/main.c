@@ -28,6 +28,10 @@ void StartDefaultTask(void const * argument);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 osThreadId defaultTaskHandle;
+
+/* Moreno 20210208 */
+#include "counter.h"
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -60,6 +64,17 @@ int main(void)
   RAW_DIAG("Newlib version %d.%d.%d", __NEWLIB__,__NEWLIB_MINOR__,__NEWLIB_PATCHLEVEL__);
   RAW_DIAG("FreeRTOS version %d.%d.%d", tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD);
   RAW_DIAG("LwIP version %d.%d.%d", LWIP_VERSION_MAJOR, LWIP_VERSION_MINOR, LWIP_VERSION_REVISION);
+    
+  /* Starting counters et al. */
+    if (uDWTCounterEnable() > 0){ // here counter register starts
+        RAW_DIAG("[ uDWTCounterEnable ] initted");
+    }
+    else {
+        RAW_DIAG("[ uDWTCounterEnable ] error ");
+    }
+  /* Done */
+  
+  /* Starting FreeRTOS kernel */
   osKernelStart();
 
   /* Infinite loop */
@@ -70,9 +85,9 @@ int main(void)
 void StartDefaultTask(void const * argument)
 {
 	/* init code for LWIP */
-
+    RAW_DIAG("[ Init ] StartDefaultTask");
 	MX_LWIP_Init();
-
+    RAW_DIAG("[ End ] StartDefaultTask");
 	/* Infinite loop */
 	for(;;){
 		osDelay(1000);
