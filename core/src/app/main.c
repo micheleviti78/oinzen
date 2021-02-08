@@ -72,6 +72,9 @@ int main(void)
     else {
         RAW_DIAG("[ uDWTCounterEnable ] error ");
     }
+    init_counter_StartDefaultTask();
+    init_counter_ethernetif_set_link();
+    init_container(); // Container of all data structure for counting clocks
   /* Done */
   
   /* Starting FreeRTOS kernel */
@@ -82,11 +85,13 @@ int main(void)
   {}
 }
 
-void StartDefaultTask(void const * argument)
+void StartDefaultTask(void const * argument) /* Priority:: osPriorityNormal */
 {
 	/* init code for LWIP */
     RAW_DIAG("[ Init ] StartDefaultTask");
+    begin_count(&counter_StartDefaultTask);
 	MX_LWIP_Init();
+    end_count(&counter_StartDefaultTask);
     RAW_DIAG("[ End ] StartDefaultTask");
 	/* Infinite loop */
 	for(;;){
