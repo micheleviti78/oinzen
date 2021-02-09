@@ -24,6 +24,10 @@
 #include "ethernetif.h"
 #include "diag.h"
 
+#if 1
+    #include "counter.h"
+#endif
+
 /*Static IP ADDRESS*/
 #define IP_ADDR0   192
 #define IP_ADDR1   168
@@ -126,6 +130,9 @@ void ethernetif_set_link(void const *argument)
 
   for(;;)
   {
+#if 1
+      begin_count(&counter_ethernetif_set_link);
+#endif
 	  switch(dhcp_link_status){
 	  case NOT_INITIALIZED:
 		  break;
@@ -216,6 +223,9 @@ void ethernetif_set_link(void const *argument)
 		  }
 		  break;
 	  }
+#if 1
+      end_count(&counter_ethernetif_set_link);
+#endif
     osDelay(1000);
   }
 }

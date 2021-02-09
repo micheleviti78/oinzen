@@ -51,6 +51,9 @@ set(COMMON_SOURCE
 	${CMAKE_SOURCE_DIR}/core/src/app/freertos.c
 	${CMAKE_SOURCE_DIR}/core/src/app/lwip.c
 	${CMAKE_SOURCE_DIR}/core/src/app/main.c
+#begin Moreno
+	${CMAKE_SOURCE_DIR}/core/src/app/counter.c
+#end Moreno
 	${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_timer.c

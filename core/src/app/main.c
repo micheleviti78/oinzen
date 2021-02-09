@@ -72,9 +72,14 @@ int main(void)
     else {
         RAW_DIAG("[ uDWTCounterEnable ] error ");
     }
+#if 0
     init_counter_StartDefaultTask();
     init_counter_ethernetif_set_link();
     init_container(); // Container of all data structure for counting clocks
+#else
+    init_counter(&counter_StartDefaultTask, "StartDefaultTask");
+    init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
+#endif
   /* Done */
   
   /* Starting FreeRTOS kernel */
