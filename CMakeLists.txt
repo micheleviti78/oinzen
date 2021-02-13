@@ -53,6 +53,7 @@ set(COMMON_SOURCE
 	${CMAKE_SOURCE_DIR}/core/src/app/main.c
 #begin Moreno
 	${CMAKE_SOURCE_DIR}/core/src/app/counter.c
+	${CMAKE_SOURCE_DIR}/core/src/app/tiny-httpd.c
 #end Moreno
 	${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
