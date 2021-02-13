@@ -24,7 +24,9 @@ add_compile_options(${ARM_FLAGS})
 add_compile_options(-Wall -Wextra)
 add_compile_options(-Wno-unused-parameter)
 add_compile_options(-fdata-sections -ffunction-sections)
-
+#begin Moreno
+add_compile_options(-I/${CMAKE_SOURCE_DIR}/lib/LwIP/src/include/compat/posix/)
+#end Moreno
 set(LDSPECS nano.specs)
 
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")

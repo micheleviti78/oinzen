@@ -31,6 +31,8 @@ osThreadId defaultTaskHandle;
 
 /* Moreno 20210208 */
 #include "counter.h"
+#include "tiny-httpd.h"
+osThreadId httpdServerHandle;
 
 /**
   * @brief  The application entry point.
@@ -80,6 +82,8 @@ int main(void)
     init_counter(&counter_StartDefaultTask, "StartDefaultTask");
     init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
 #endif
+    osThreadDef(httpdServer, tinyd, osPriorityNormal, 0, 4096);
+    httpdServerHandle = osThreadCreate(osThread(httpdServer), NULL);
   /* Done */
   
   /* Starting FreeRTOS kernel */
