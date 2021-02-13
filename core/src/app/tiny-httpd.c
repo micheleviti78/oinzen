@@ -375,7 +375,7 @@ void tinyd(void const * argument)
     int httpd = -1;
     struct sockaddr_in name;
 	int name_len = sizeof(name);
-	
+    RAW_DIAG("tinyd");
 #ifdef LWIP_HDR_INIT_H
     /* LwIP misses the function call getprotobyname and the respective
      struct protoent */

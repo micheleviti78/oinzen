@@ -33,7 +33,18 @@ osThreadId defaultTaskHandle;
 #include "counter.h"
 #include "tiny-httpd.h"
 osThreadId httpdServerHandle;
+osThreadId stupidHandle;
 
+void Stupid(void const * argument) /* Priority:: osPriorityNormal */
+{
+    /* init code for LWIP */
+    RAW_DIAG("[ Init ] Stupid");
+    /* Infinite loop */
+    for(;;){
+        osDelay(1000);
+        RAW_DIAG("[ LOG ] Stupid");
+    }
+}
 /**
   * @brief  The application entry point.
   * @retval int
@@ -82,14 +93,26 @@ int main(void)
     init_counter(&counter_StartDefaultTask, "StartDefaultTask");
     init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
 #endif
+
+    osThreadDef(stupidThread, Stupid, osPriorityNormal, 0, 4096);
+    stupidHandle = osThreadCreate(osThread(stupidThread), NULL);
+
+#if 0
+    /*
+     #define. osThreadDef(name, function, priority, instances, stacksz)
+    Create a Thread Definition with function, priority, and stack requirements.
+     */
+    /* The httpd server must start after the network is up: do we need a semaphore? */
     osThreadDef(httpdServer, tinyd, osPriorityNormal, 0, 4096);
     httpdServerHandle = osThreadCreate(osThread(httpdServer), NULL);
-  /* Done */
+#endif
+    /* Done */
   
   /* Starting FreeRTOS kernel */
   osKernelStart();
 
   /* Infinite loop */
+    RAW_DIAG("[ ERROR ] osKernelStart crashed");
   while (1)
   {}
 }
