@@ -36,6 +36,8 @@ enum task_counter {BEGIN=0,
 struct counter counter_StartDefaultTask;
 /* ethernetif_set_link */
 struct counter counter_ethernetif_set_link;
+/* Stupid */
+struct counter counter_Stupid;
 
 /* Container for all the struct counter */
 struct counter **container;

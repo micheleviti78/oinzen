@@ -375,30 +375,36 @@ void tinyd(void const * argument)
     int httpd = -1;
     struct sockaddr_in name;
 	int name_len = sizeof(name);
+    
     RAW_DIAG("tinyd");
+    
 #ifdef LWIP_HDR_INIT_H
+    
     /* LwIP misses the function call getprotobyname and the respective
      struct protoent */
     httpd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
 #else
+
     struct protoent *p;
 	p = getprotobyname("tcp"); /* get the protocol number for tcp */
 	/*
 	 int socket(int domain, int type, int protocol);
 	 */
 	httpd = socket(AF_INET, SOCK_STREAM, p->p_proto); /* open a socket for IP4, type stream bidirectional, tcp */
+
 #endif
     
 	if (httpd == -1) {
-		RAW_DIAG("socket");
+		RAW_DIAG("[ ERROR ] socket");
         while(1) {};
 	}
 
 	memset(&name, 0, name_len);
 	name.sin_family = AF_INET;
-	name.sin_port = htons(port);              /* convert values between host and network byte order */
+	name.sin_port = htons(port); /* convert values between host and network byte order */
 	name.sin_addr.s_addr = htonl(INADDR_ANY); /* convert values between host and network byte order */
-        /*
+    /*
 	 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 	*/
 	if (bind(httpd, (struct sockaddr*) &name, name_len) < 0) { /*  bind a name to a socket */
