@@ -92,6 +92,7 @@ void reset_count(struct counter *usage){
     return;
 }
 
+#if 0
 void init_container(void){
     
     enum task_counter _counters;
@@ -115,7 +116,9 @@ void init_container(void){
     return;
 }
 
-void q_init_container(struct counter *c){
+#else
+
+void init_container(struct counter *c){
     
     static uint32_t _last = 0;
     static uint32_t _minimum_size = 16;
@@ -145,6 +148,7 @@ void q_init_container(struct counter *c){
     return;
 }
 
+#endif
 
 void init_counter(struct counter *c, char *name){
     
@@ -158,11 +162,11 @@ void init_counter(struct counter *c, char *name){
         if (i == 63) break;
     }
     c->task_name[i] = '\0';
-    q_init_container(c);
+    init_container(c);
     
     return;
 }
-
+/* NOT NEEDED ANYMORE */
 /* Task: StartDefaultTask */
 void init_counter_StartDefaultTask(void) {
     
@@ -211,43 +215,29 @@ void vApplicationIdleHook( void )
      memory allocated by the kernel to any task that has since been deleted. */
     
     static uint32_t _tick=0, _last_tick=0, _this_tick=0;
-    const float _freq = 16000000.0f; //(float) SystemCoreClock;
-    enum task_counter _counters;
     const uint32_t _n_seconds = 60;
     const uint32_t _ticks_pause = 1000;
-    const float _f_seconds = (float) _n_seconds;
+    static const float _freq = 160000000; //(float) SystemCoreClock;
+    static const float _f_seconds = (float) _n_seconds;
+    static const float _ratio = 100.0f/(_freq * _f_seconds);
+    char buf[128];
     
-    char log[32];
-    
-    sprintf(log, "[ Logging ] every %lds", _n_seconds);
+    sprintf(buf, "[ Logging ] every %lds", _n_seconds);
 
     _this_tick = xTaskGetTickCount();
-    _tick = _tick + ( _this_tick - _last_tick);
+    _tick = _tick + (_this_tick - _last_tick);
     _last_tick = _this_tick;
     
     if (_tick >= _n_seconds * _ticks_pause){
         RAW_DIAG(log);
-#if 0   // original version
-        for (uint32_t i=1; i < LAST; i++){
-            char buf[128];
-            float _total_usage = 100.0f * (float) container[i]->total_usage/(_freq * _f_seconds);
-            uint32_t _integer = (uint32_t) floorf(_total_usage);
-            uint32_t _dec = (uint32_t) ((_total_usage - (float) _integer) * 100.0f);
-#if 0   // logging out
-            sprintf(buf, "%s: %lu", container[i]->task_name,
-                    container[i]->total_usage);
-#else
-            sprintf(buf, "%s: %lu.%lu", container[i]->task_name,
-                    _integer, _dec);
-#endif  // end logging out
-            RAW_DIAG(buf);
-            reset_count(container[i]);
-        }
-#else   // new version of initialization of counter
         uint32_t i = 0;
         while (container[i] != NULL){
-            char buf[128];
+            
+#if 0
             float _total_usage = 100.0f * (float) container[i]->total_usage/(_freq * _f_seconds);
+#else
+            float _total_usage = (float) container[i]->total_usage * _ratio;
+#endif
             uint32_t _integer = (uint32_t) floorf(_total_usage);
             uint32_t _dec = (uint32_t) ((_total_usage - (float) _integer) * 100.0f);
             sprintf(buf, "%s: %lu.%lu", container[i]->task_name,
@@ -256,7 +246,6 @@ void vApplicationIdleHook( void )
             reset_count(container[i]);
             i++;
         }
-#endif
         _tick = 0;
         return;
     }

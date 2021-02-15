@@ -109,23 +109,18 @@ int main(void)
 #else
     init_counter(&counter_StartDefaultTask, "StartDefaultTask");
     init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
+    init_counter(&counter_tinyd, "Static HTTPD");
 #endif
 
 #if STUPID
     init_counter(&counter_Stupid, "Stupid");
+    /*
+     #define. osThreadDef(name, function, priority, instances, stacksz)
+     Create a Thread Definition with function, priority, and stack requirements.
+     */
     osThreadDef(stupidThread, Stupid, osPriorityBelowNormal, 0, 4096);
     stupidHandle = osThreadCreate(osThread(stupidThread), NULL);
 #endif // STUPID
-    
-#if 0
-    /*
-     #define. osThreadDef(name, function, priority, instances, stacksz)
-    Create a Thread Definition with function, priority, and stack requirements.
-     */
-    /* The httpd server must start after the network is up: do we need a semaphore? */
-    osThreadDef(httpdServer, tinyd, osPriorityNormal, 0, 4096);
-    httpdServerHandle = osThreadCreate(osThread(httpdServer), NULL);
-#endif
     /* Done */
   
   /* Starting FreeRTOS kernel */

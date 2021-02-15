@@ -17,6 +17,8 @@
 #include "lwip.h"
 /* For printf */
 #include "diag.h"
+/* for counter */
+#include "counter.h"
 /* networking */
 //#include <netinet/in.h> /* Not existing in LwIP and not needed anyway*/
 #include <arpa/inet.h>
@@ -470,7 +472,10 @@ void tinyd(void const *argument)
 			RAW_DIAG("[ ERROR ] accept");
 		}
 		else {
+            /* add counter */
+            begin_count(&counter_tinyd);
 			accept_request(client_sock);
+            end_count(&counter_tinyd);
 		}
 	}
 	/*
