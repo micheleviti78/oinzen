@@ -31,7 +31,7 @@ osThreadId defaultTaskHandle;
 
 /* Moreno 20210208 */
 #include "counter.h"
-#include "tiny-httpd.h"
+
 osThreadId httpdServerHandle;
 osThreadId stupidHandle;
 #define STUPID 1
@@ -42,7 +42,7 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
     RAW_DIAG("[ Init ] Stupid");
     /* Infinite loop */
     for(;;){
-        volatile static uint32_t c=0;
+        static volatile uint32_t c=0;
         uint32_t endOf;
         osDelay(1000);
         begin_count(&counter_Stupid);
@@ -112,6 +112,7 @@ int main(void)
     osThreadDef(stupidThread, Stupid, osPriorityNormal, 0, 4096);
     stupidHandle = osThreadCreate(osThread(stupidThread), NULL);
 #endif // STUPID
+    
 #if 0
     /*
      #define. osThreadDef(name, function, priority, instances, stacksz)

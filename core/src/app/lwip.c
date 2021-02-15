@@ -23,9 +23,10 @@
 #include "lwip/netif.h"
 #include "ethernetif.h"
 #include "diag.h"
-
+/* Moreno */
 #if 1
     #include "counter.h"
+    #include "tiny-httpd.h"
 #endif
 
 /*Static IP ADDRESS*/
@@ -67,9 +68,20 @@ ip4_addr_t gw;
   */
 void MX_LWIP_Init(void)
 {
+#if 1
   /* Initialize the LwIP stack with RTOS */
   tcpip_init( NULL, NULL );
-
+#else
+    /* Michrochip example: it does not release the semaphore, but good to know how it works
+     with LwIP semaphore */
+    sys_sem_t sem;
+    err_t err_sem;
+    err_sem = sys_sem_new(&sem, 0); /* Create a new semaphore. */
+    //tcpip_init(tcpip_init_done, &sem);
+    tcpip_init(NULL, &sem);
+    sys_sem_wait(&sem); /* Block until the lwIP stack is initialized. */
+    sys_sem_free(&sem); /* Free the semaphore. */
+#endif
   /* IP addresses initialization with DHCP (IPv4) */
   ipaddr.addr = 0;
   netmask.addr = 0;
@@ -113,6 +125,18 @@ void MX_LWIP_Init(void)
   link_arg.semaphore = Netif_LinkSemaphore;
   /* Create the Ethernet link handler thread */
 /* USER CODE BEGIN OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+    /* Moreno: Begin */
+    /* As in the Microchip example, the webserver (any any network related busyness) is
+     controlled by LwIP by
+     sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio);
+     name: human-readable name for the thread (used for debugging purposes)
+     thread: thread-function
+     arg: parameter passed to 'thread'
+     stacksize: stack size in bytes for the new thread (may be ignored by ports)
+     prio: priority of the new thread (may be ignored by ports)
+     */
+    sys_thread_new("Tiny-HTTPD", tinyd, NULL, 1024, osPriorityAboveNormal);
+    /* Moreno: End */
   osThreadDef(LinkThr, ethernetif_set_link, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(LinkThr), &link_arg);
 /* USER CODE END OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */

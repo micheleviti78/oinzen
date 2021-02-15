@@ -38,7 +38,7 @@
 #define SEND(s) (send(client, s, STRLEN(s), 0))
 #define SERVER_STRING "Server: J. David's webserver httpd/0.1.0\r\n"
 #define SERVER_PORT 9999
-#define SERVEFILE 0
+// #define SERVEFILE
 
 void accept_request(int); /* Needed */
 int get_line(int, char *, int); /* Needed */
@@ -107,7 +107,7 @@ void accept_request(int client) /* LISTEN THE SOCKET */
     
 	if (strcasecmp(method, "GET") == 0) {
         
-#if SERVEFILE
+#ifdef SERVEFILE
         
 		serve_file(client, "index.html");
         
@@ -185,7 +185,7 @@ inline int32_t size_of(char *buf){
     return i;
 }
 
-#if SERVEFILE
+#ifdef SERVEFILE
 
 void headers(int client, const char *filename)
 {
@@ -242,7 +242,7 @@ void serve_file(int client, const char *filename)
 		numchars = get_line(client, buf, sizeof(buf));
 		printf("numchars %d %s\n", numchars, buf);
 	}
-        printf("[ LOG ] serve_file buf %s\n", buf);
+    printf("[ LOG ] serve_file buf %s\n", buf);
 	resource = fopen(filename, "r");
 	if (resource == NULL)
 		printf("File not found\n"); //not_found(client);
@@ -318,7 +318,7 @@ void serve_index(int client){
 		}
 	}
 
-	printf("[ LOG ] serve_file buf %s\n", buf);
+	printf("[ LOG ] serve_index buf %s\n", buf);
 
 #include "index.h"
 	static const char msg_0[] = "HTTP/1.0 200 OK\r\n";
@@ -363,11 +363,12 @@ void serve_index(int client){
 
 #if 0
 int main(void)
+#elif defined(LWIP_HDR_INIT_H)
+void tinyd(void *argument)
 #else
-void tinyd(void const * argument)
+void tinyd(void const *argument)
 #endif
 {
-	int server_sock = -1;
 	uint32_t port = SERVER_PORT;
 	int client_sock = -1;
 	struct sockaddr_in client_name;
@@ -442,10 +443,10 @@ void tinyd(void const * argument)
 				     (uint32_t*) &client_name_len);
 		if (client_sock == -1) {
 			RAW_DIAG("[ ERROR ] accept");
-            while (1) {} ;
-		}
-
-		accept_request(client_sock);
+    	}
+        else {
+            accept_request(client_sock);
+        }
 	}
 	/*
 	 close( ... ) â close a file descriptor
@@ -454,7 +455,7 @@ void tinyd(void const * argument)
 
 	 int close(int fildes);
 	 */
-	close(server_sock);
+	close(client_sock);
     
     return;
 }
