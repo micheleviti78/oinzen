@@ -85,7 +85,7 @@ target_link_libraries(${PROJECT_NAME} printf)
 #target_link_libraries(${PROJECT_NAME} upy)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${ARM_SIZE_UTIL} ${PROJECT_NAME}.elf
+    COMMAND ${ARM_SIZE_UTIL} --format=sysv ${PROJECT_NAME}.elf
     COMMAND ${ARM_OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
     )
     

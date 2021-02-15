@@ -42,9 +42,9 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
     RAW_DIAG("[ Init ] Stupid");
     /* Infinite loop */
     for(;;){
-        static volatile uint32_t c=0;
+        static volatile uint32_t c=0, s=0;
         uint32_t endOf;
-        osDelay(1000);
+        // osDelay(1000);
         begin_count(&counter_Stupid);
         endOf = (c & INT32_MAX);
         while (c < 2*endOf+1) {
@@ -55,7 +55,11 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
             }
         };
         end_count(&counter_Stupid);
-        RAW_DIAG("[ LOG ] Stupid");
+        s++;
+        if (s == 60) {
+            RAW_DIAG("[ LOG ] Stupid");
+            s = 0;
+        }
     }
 }
 /**
@@ -109,7 +113,7 @@ int main(void)
 
 #if STUPID
     init_counter(&counter_Stupid, "Stupid");
-    osThreadDef(stupidThread, Stupid, osPriorityNormal, 0, 4096);
+    osThreadDef(stupidThread, Stupid, osPriorityBelowNormal, 0, 4096);
     stupidHandle = osThreadCreate(osThread(stupidThread), NULL);
 #endif // STUPID
     

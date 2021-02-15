@@ -15,10 +15,10 @@
 
 /* To be included for network stack */
 #include "lwip.h"
-/* For RAW_DIAG */
+/* For printf */
 #include "diag.h"
 /* networking */
-//#include <netinet/in.h>
+//#include <netinet/in.h> /* Not existing in LwIP and not needed anyway*/
 #include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -28,17 +28,19 @@
 
 /*
  isspace()
-          checks  for  white-space  characters.   In  the  "C" and "POSIX" locales, these are:
-          space, form-feed ('\f'), newline ('\n'), carriage return ('\r'), horizontal tab
-	  ('\t'), and vertical tab ('\v').
-	  */
+ checks  for  white-space  characters.   In  the  "C" and "POSIX" locales, these are:
+ space, form-feed ('\f'), newline ('\n'), carriage return ('\r'), horizontal tab
+ ('\t'), and vertical tab ('\v').
+ */
 
 #define ISspace(x) isspace((int)(x))
 #define STRLEN(s) ((sizeof(s)/sizeof(s[0]))-1)
 #define SEND(s) (send(client, s, STRLEN(s), 0))
 #define SERVER_STRING "Server: J. David's webserver httpd/0.1.0\r\n"
 #define SERVER_PORT 9999
+/* Define the needed one at compilation time */
 // #define SERVEFILE
+// #define DEBUG
 
 void accept_request(int); /* Needed */
 int get_line(int, char *, int); /* Needed */
@@ -61,7 +63,7 @@ int32_t isSpace(char c){ /* RETURN 1 IF THE CHAR IS NOT ALPHA-NUMERIC */
 	else if (c == '\t') return 1;
 	else if (c == '\v') return 1;
 
-    return 0;
+	return 0;
 }
 
 void accept_request(int client) /* LISTEN THE SOCKET */
@@ -73,21 +75,21 @@ void accept_request(int client) /* LISTEN THE SOCKET */
 
 #ifdef DEBUG
 
-    char _err[512];
+	char _err[512];
 
 #endif
 
-    // numchars =
-    get_line(client, buf, sizeof(buf)); /* buf contains the input string */
+	// numchars =
+	get_line(client, buf, sizeof(buf)); /* buf contains the input string */
 
 #ifdef DEBUG
-    
-    sprintf(_err, "[ LOG ] buf %s", buf);
-    RAW_DIAG(_err);
+
+	sprintf(_err, "[ LOG ] buf %s", buf);
+	RAW_DIAG(_err);
 
 #endif // DEBUG
 
-    i = 0;
+	i = 0;
 	j = 0;
 
 	while (!isSpace(buf[j]) && (i < sizeof(method) - 1))
@@ -97,30 +99,35 @@ void accept_request(int client) /* LISTEN THE SOCKET */
 		j++;
 	}
 	method[i] = '\0';
-    
+
 #ifdef DEBUG
 
-    sprintf(_err, "[ LOG ] method %s", method);
-    RAW_DIAG();
+	sprintf(_err, "[ LOG ] method %s", method);
+	RAW_DIAG(_err);
 
 #endif // DEBUG
-    
+
+#if 0
 	if (strcasecmp(method, "GET") == 0) {
-        
-#ifdef SERVEFILE
-        
-		serve_file(client, "index.html");
-        
 #else
-		
-        serve_index(client);
+	/* shorter time to compare 2 integer than 3 char */
+	if (*(int32_t *) method == *(int32_t *) "GET") {
+#endif
+
+#ifdef SERVEFILE
+
+		serve_file(client, "index.html");
+
+#else
+
+		serve_index(client);
 
 #endif // SERVEFILE
 
-    }
-    else {
-        RAW_DIAG("[ ERROR ] method");
-    }
+	}
+	else {
+		RAW_DIAG("[ ERROR ] method");
+	}
 	close(client);
 }
 
@@ -145,25 +152,25 @@ int get_line(int sock, char *buf, int size) /* READ FROM THE SOCKET THE INPUT ST
 
 	while ((i < size - 1) && (c != '\n'))
 	{
-	    n = recv(sock, &c, 1, 0);
-	    /* recv( ... ) receive a message from a socket
-	     ssize_t recv(int sockfd, void *buf, size_t len, int flags);
-	     */
-	        if (n > 0)
+		n = recv(sock, &c, 1, 0);
+		/* recv( ... ) receive a message from a socket
+		 ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+		 */
+		if (n > 0)
 		{
 			if (c == '\r')
 			{
-			    n = recv(sock, &c, 1, MSG_PEEK);
-	        	    if ((n > 0) && (c == '\n'))
-				recv(sock, &c, 1, 0);
-			    else
-				c = '\n';
+				n = recv(sock, &c, 1, MSG_PEEK);
+				if ((n > 0) && (c == '\n'))
+					recv(sock, &c, 1, 0);
+				else
+					c = '\n';
 			}
 			buf[i] = c;
 			i++;
 		}
 		else
-		    c = '\n';
+			c = '\n';
 	}
 	buf[i] = '\0'; /* NULL terminate the string */
 
@@ -178,11 +185,11 @@ int get_line(int sock, char *buf, int size) /* READ FROM THE SOCKET THE INPUT ST
 /* strlen clone */
 inline int32_t size_of(char *buf){
 
-    int32_t i = 0;
+	int32_t i = 0;
 
-    while (buf[i] != '\0') i++;
+	while (buf[i] != '\0') i++;
 
-    return i;
+	return i;
 }
 
 #ifdef SERVEFILE
@@ -194,12 +201,12 @@ void headers(int client, const char *filename)
 	static const char msg_2[] = "Content-Type: text/html\r\n";
 	static const char msg_3[] = "\r\n";
 
-    SEND( msg_0 );
+	SEND( msg_0 );
 	SEND( msg_1 );
 	SEND( msg_2 );
-    SEND( msg_3 );
-    
-    return;
+	SEND( msg_3 );
+
+	return;
 }
 
 /**********************************************************************/
@@ -211,14 +218,14 @@ void headers(int client, const char *filename)
 /**********************************************************************/
 void cat(int client, FILE *resource)
 {
-    char buf[1024];
-    
-    fgets(buf, sizeof(buf), resource);
-    while (!feof(resource))
-    {
-        send(client, buf, strlen(buf), 0);
-        fgets(buf, sizeof(buf), resource);
-    }
+	char buf[1024];
+
+	fgets(buf, sizeof(buf), resource);
+	while (!feof(resource))
+	{
+		send(client, buf, strlen(buf), 0);
+		fgets(buf, sizeof(buf), resource);
+	}
 }
 
 /**********************************************************************/
@@ -242,7 +249,7 @@ void serve_file(int client, const char *filename)
 		numchars = get_line(client, buf, sizeof(buf));
 		printf("numchars %d %s\n", numchars, buf);
 	}
-    printf("[ LOG ] serve_file buf %s\n", buf);
+	printf("[ LOG ] serve_file buf %s\n", buf);
 	resource = fopen(filename, "r");
 	if (resource == NULL)
 		printf("File not found\n"); //not_found(client);
@@ -258,20 +265,20 @@ void serve_file(int client, const char *filename)
 
 void serve_index(int client){
 
-	static int numchars = 1;
-	static int32_t s_len = 0;
+	static int32_t numchars = 1;
+    size_t size_of_out = 0;
     static const char Agent[] = "USER-AGENT";
 	static const char OFFSET = 'a' - 'A';
-    static const char _begin[] = "<p>";
-    static const char _end[] = "</p>";
-    static const char _user[] = "User-Agent: ";
-    static char buf[256];
+	static const char _begin[] = "<p>";
+	static const char _end[] = "</p>";
+	static const char _user[] = "User-Agent: ";
+	static char buf[256];
 	static char out[256];
 
 #ifdef DEBUG
-    static char _err[512];
+	static char _err[512];
 #endif //DEBUG
-    
+
 	buf[0] = 'A';
 	buf[1] = '\0';
 
@@ -279,59 +286,76 @@ void serve_index(int client){
 		numchars = get_line(client, buf, sizeof(buf));
 
 #ifdef DEBUG
-        
-        sprintf(_err,"%d %s \n", numchars, buf);
-		RAW_DIAG(_err);
-        
-#endif // DEBUG
-        
-		char *q = &buf[0];
 
-		if ((*q = 'a') || (*q= 'A')) {
+		sprintf(_err,"%d %s \n", numchars, buf);
+		RAW_DIAG(_err);
+
+#endif // DEBUG
+
+		char *q = &buf[0];
+        /* We raise any buf beginning with u or U to catch User-Agent string
+         to be used as example
+         */
+		if ((*q == 'u') || (*q == 'U')) {
 			for (uint32_t i=0; i < STRLEN( Agent ); i++) {
 				*q = (*q >= 'a' && *q <= 'z') ? *q -= OFFSET : *q;
 				q++;
 			}
-            
-#if DEBUG
-            
-            sprintf(_err, "BUFFER %s\n", buf);
+
+#ifdef DEBUG
+
+			sprintf(_err, "BUFFER %s\n", buf);
             RAW_DIAG(_err);
-            
+
 #endif // DEBUG
-            
-       }
+
+		} // END while
 
 		if (strncmp(Agent, buf, STRLEN( Agent )) == 0) {
-/*
- printf("strcmp %d \n", strncmp(Agent, buf, STRLEN( Agent )));
-			    s_len = sprintf(out, "<p> User-Agent: %s </p>",     &buf[STRLEN( Agent )+2]);
-                        printf("%s \n", out);
- */
-            const char *q = (const char*) &buf[STRLEN( Agent )+2];
-            char *w = &out[0];
+			/*
+			 printf("strcmp %d \n", strncmp(Agent, buf, STRLEN( Agent )));
+			 s_len = sprintf(out, "<p> User-Agent: %s </p>",     &buf[STRLEN( Agent )+2]);
+			 printf("%s \n", out);
+			 */
+#ifdef DEBUG
+
+            RAW_DIAG("%s\n", buf);
+
+#endif // DEBUG
+            
+			const char *q = (const char*) &buf[STRLEN( Agent )+2];
+			char *w = &out[0];
             while (*q != '\0') {
-                *out = *q;
-                w++;
-                q++;
-            }
+				*w = *q;
+				w++;
+				q++;
+                size_of_out++;
+			}
+            
+#ifdef DEBUG
+
+			RAW_DIAG("%s\n", out);
+
+#endif
 		}
 	}
 
-	printf("[ LOG ] serve_index buf %s\n", buf);
+	RAW_DIAG("[ LOG ] serve_index buf %s\n", buf);
 
 #include "index.h"
 	static const char msg_0[] = "HTTP/1.0 200 OK\r\n";
 	static const char msg_1[] = SERVER_STRING;
 	static const char msg_2[] = "Content-Type: text/html\r\n";
 	static const char msg_3[] = "\r\n";
-    /* Sending Header */
-    send(client, msg_0, STRLEN(msg_0), 0);
-    SEND( msg_1 );
-    SEND( msg_2 );
-    SEND( msg_3 );
-    
-	/* Sending index.html */
+	/* Sending Header */
+	send(client, msg_0, STRLEN(msg_0), 0);
+	SEND( msg_1 );
+	SEND( msg_2 );
+	SEND( msg_3 );
+
+	/* Sending index.html ---> index.h
+	 Simplifing the index.h, we can avoid several SEND( ... )
+	 */
 	send(client, index_1, STRLEN(index_1), 0);
 	SEND( index_2 );
 	SEND( index_3 );
@@ -344,11 +368,12 @@ void serve_index(int client){
 	SEND( index_9 );
 	SEND( index_10 );
 	SEND( index_11 );
-    /* sending the User-Agent */
-    send(client, _begin, STRLEN( _begin ), 0);
-    send(client, _user, STRLEN( _user ), 0);
-    send(client, out, s_len, 0);
-    send(client, _end, STRLEN( _end ), 0);
+	/* sending the User-Agent */
+	send(client, _begin, STRLEN( _begin ), 0);
+	send(client, _user, STRLEN( _user ), 0);
+	send(client, out, size_of_out, 0);
+	send(client, _end, STRLEN( _end ), 0);
+    /* <---------> */
 	SEND( index_12 );
 	SEND( index_13 );
 	SEND( index_14 );
@@ -372,22 +397,22 @@ void tinyd(void const *argument)
 	uint32_t port = SERVER_PORT;
 	int client_sock = -1;
 	struct sockaddr_in client_name;
-    int client_name_len = sizeof(client_name);
-    int httpd = -1;
-    struct sockaddr_in name;
+	int client_name_len = sizeof(client_name);
+	int httpd = -1;
+	struct sockaddr_in name;
 	int name_len = sizeof(name);
-    
-    RAW_DIAG("tinyd");
-    
+
+	printf("tinyd");
+
 #ifdef LWIP_HDR_INIT_H
-    
-    /* LwIP misses the function call getprotobyname and the respective
-     struct protoent */
-    httpd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	/* LwIP misses the function call getprotobyname and the respective
+	 struct protoent */
+	httpd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 #else
 
-    struct protoent *p;
+	struct protoent *p;
 	p = getprotobyname("tcp"); /* get the protocol number for tcp */
 	/*
 	 int socket(int domain, int type, int protocol);
@@ -395,28 +420,28 @@ void tinyd(void const *argument)
 	httpd = socket(AF_INET, SOCK_STREAM, p->p_proto); /* open a socket for IP4, type stream bidirectional, tcp */
 
 #endif
-    
+
 	if (httpd == -1) {
 		RAW_DIAG("[ ERROR ] socket");
-        while(1) {};
+		while(1) {};
 	}
 
 	memset(&name, 0, name_len);
 	name.sin_family = AF_INET;
 	name.sin_port = htons(port); /* convert values between host and network byte order */
 	name.sin_addr.s_addr = htonl(INADDR_ANY); /* convert values between host and network byte order */
-    /*
+	/*
 	 int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
-	*/
+	 */
 	if (bind(httpd, (struct sockaddr*) &name, name_len) < 0) { /*  bind a name to a socket */
 		RAW_DIAG("[ ERROR ] bind");
-        while(1) {};
+		while(1) {};
 	}
 	/* int getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen); */
 	if (getsockname(httpd, (struct sockaddr*) &name, (uint32_t*) &name_len) < 0) {
-        RAW_DIAG("[ ERROR ] getsockname");
-        while(1) {};
- 	}
+		RAW_DIAG("[ ERROR ] getsockname");
+		while(1) {};
+	}
 	/*
 	 listen - listen for connections on a socket
 	 #include <sys/types.h>
@@ -426,10 +451,10 @@ void tinyd(void const *argument)
 	 */
 	if (listen(httpd, 1) < 0) {
 		RAW_DIAG("[ ERROR ] listen");
-        while (1) {};
+		while (1) {};
 	}
 
-	RAW_DIAG("[ LOG ] httpd running on port SERVER_PORT");
+	RAW_DIAG("[ LOG ] httpd running on port 9999");
 
 	while (1)
 	{
@@ -443,10 +468,10 @@ void tinyd(void const *argument)
 				     (uint32_t*) &client_name_len);
 		if (client_sock == -1) {
 			RAW_DIAG("[ ERROR ] accept");
-    	}
-        else {
-            accept_request(client_sock);
-        }
+		}
+		else {
+			accept_request(client_sock);
+		}
 	}
 	/*
 	 close( ... ) â close a file descriptor
@@ -455,7 +480,6 @@ void tinyd(void const *argument)
 
 	 int close(int fildes);
 	 */
-	close(client_sock);
+    close(client_sock);
     
-    return;
 }
