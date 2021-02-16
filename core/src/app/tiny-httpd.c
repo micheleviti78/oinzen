@@ -19,6 +19,8 @@
 #include "diag.h"
 /* for counter */
 #include "counter.h"
+/* for ntp client */
+#include "ntp_client.h"
 /* networking */
 //#include <netinet/in.h> /* Not existing in LwIP and not needed anyway*/
 #include <arpa/inet.h>
@@ -35,7 +37,6 @@
  ('\t'), and vertical tab ('\v').
  */
 
-#define ISspace(x) isspace((int)(x))
 #define STRLEN(s) ((sizeof(s)/sizeof(s[0]))-1)
 #define SEND(s) (send(client, s, STRLEN(s), 0))
 #define SERVER_STRING "Server: J. David's webserver httpd/0.1.0\r\n"
@@ -268,7 +269,7 @@ void serve_file(int client, const char *filename)
  * Send the virtual index.html page to client.
  * Parameters: the client
  * ********************************************** */
-
+    
 void serve_index(int client){
 
 	static int32_t numchars = 1;
@@ -280,6 +281,7 @@ void serve_index(int client){
 	static const char _user[] = "User-Agent: ";
     static char buf[256];
 	static char _out[256];
+    static char _tasks_buf[512];
 
 #ifdef DEBUG
 	static char _err[512];
@@ -346,39 +348,48 @@ void serve_index(int client){
 		}
 	}
 
-	RAW_DIAG("[ LOG ] serve_index buf %s\n", buf);
+	RAW_DIAG("[ LOG ] serve_index buf %s", buf);
 
 #include "index.h"
+#if 0
 	static const char msg_0[] = "HTTP/1.0 200 OK\r\n";
 	static const char msg_1[] = SERVER_STRING;
 	static const char msg_2[] = "Content-Type: text/html\r\n";
 	static const char msg_3[] = "\r\n";
+#endif
+    static const char _header[] =
+        "HTTP/1.0 200 OK\r\nServer: J. David's webserver httpd/0.1.0\r\nContent-Type: text/html\r\n\r\n";
 	/* Sending Header */
+#if 0
 	send(client, msg_0, STRLEN(msg_0), 0);
 	SEND( msg_1 );
 	SEND( msg_2 );
 	SEND( msg_3 );
-
+#else
+    SEND( _header );
+#endif
 	/* Sending index.html ---> index.h
 	 Simplifing the index.h, we can avoid several SEND( ... )
 	 */
+#if 0
 	send(client, index_1, STRLEN(index_1), 0);
 	SEND( index_2 );
 	SEND( index_3 );
 	SEND( index_4 );
 	SEND( index_5 );
 	SEND( index_6 );
-	SEND( index_7 );
-	SEND( index_8 );
-	SEND( index_8 );
+#else
+    SEND( index_head );
+	SEND( index_body );
 	SEND( index_9 );
-	SEND( index_10 );
-	SEND( index_11 );
-	/* sending the User-Agent */
+#endif
+
+    /* sending the User-Agent: can be simplified */
 	send(client, _begin, STRLEN( _begin ), 0);
 	send(client, _user, STRLEN( _user ), 0);
 	send(client, _out, size_of_out, 0);
 	send(client, _end, STRLEN( _end ), 0);
+    
     /* Reset _out */
     {
         uint32_t *_p = (uint32_t*) &_out[0];
@@ -402,13 +413,14 @@ void serve_index(int client){
    ÔDÕ Ð Deleted (waiting clean up)
    ÔSÕ Ð Suspended, or Blocked without a timeout
  */
-    char _tasks_buf[512];
-    uint32_t *_p = (uint32_t*) &_tasks_buf[0];
-    register uint32_t _z = 0x0;
-    for (uint32_t i=0; i<(512>>2); i++){ /* shift to assembly */
-        _p[i] = _z;
+    {
+        uint32_t *_p = (uint32_t*) &_tasks_buf[0];
+        register uint32_t _z = 0x0;
+        for (uint32_t i=0; i<(512>>2); i++){
+            /* shift to assembly or pipeline */
+            _p[i] = _z;
+        }
     }
-        
     static const char _pre[] = "<pre>";
     static const char _epre[] = "</pre>";
     static const char _head[] = "Name            State   Prio.   Stack   Num\n";
@@ -426,17 +438,13 @@ void serve_index(int client){
     SEND(_head);
     SEND(_tasks_buf);
     SEND(_legend);
-//    SEND(_epre);
 
 #endif // TRACETASKS
 
     /* <---------> */
-	SEND( index_12 );
 	SEND( index_13 );
-	SEND( index_14 );
     SEND( _out );
 	SEND( index_15 );
-	SEND( index_16 );
     
 	return;
 }

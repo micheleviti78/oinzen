@@ -42,26 +42,17 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
     RAW_DIAG("[ Init ] Stupid");
     /* Infinite loop */
     for(;;){
-        static volatile uint32_t c=0, s=0;
-        uint32_t endOf;
-        // osDelay(1000);
+        static volatile uint32_t c=0;
+        
         begin_count(&counter_Stupid);
-        endOf = (c & INT16_MAX);
         while (c < UINT16_MAX) {
             c++;
         };
         c = 0;
-        end_count(&counter_Stupid);
-        osDelay(3000);
-#if 0
-        s++;
-        if (s == 6000) {
-            RAW_DIAG("[ LOG ] Stupid");
-            s = 0;
-        }
-#else
         RAW_DIAG("[ LOG ] Stupid");
-#endif
+        end_count(&counter_Stupid);
+        
+        osDelay(3000);
     }
 }
 /**

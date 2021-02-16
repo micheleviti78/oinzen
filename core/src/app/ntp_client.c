@@ -36,8 +36,8 @@ static const char servers[4][18] ={"0.de.pool.ntp.org",
 
 void ntp_client(void *argument)
 {
-  int sockfd, n; // Socket file descriptor and the n return result from writing/reading from the socket.
-  const int portno = 123; // NTP UDP port number.
+  int32_t sockfd, n; // Socket file descriptor and the n return result from writing/reading from the socket.
+  const uint32_t portno = 123; // NTP UDP port number.
   const uint32_t _fuse = 3600; // the time is in UT, we add 3600 seconds
   // char host_name[] = "us.pool.ntp.org"; // NTP server host-name.
   struct sockaddr_in serv_addr; // Server address data structure.
@@ -79,11 +79,12 @@ void ntp_client(void *argument)
   memset( &packet, 0, sizeof( ntp_packet ) );
 #else
     ntp_packet packet;
-    
-    for (uint32_t i=0; i< (48>2); i++){
-        register uint32_t _z = 0x0;
+    {
         uint32_t *_p = (uint32_t*) &packet;
-        *_p = _z;
+        register uint32_t _z = 0x0;
+        for (uint32_t i=0; i< (48>2); i++){
+            _p[i] = _z;
+        }
     }
 #endif
   // Set the first byte's bits to 00,011,011 for li = 0, vn = 3, and mode = 3. The rest will be left set to zero.
@@ -154,4 +155,5 @@ void ntp_client(void *argument)
 #ifdef DEBUG
   RAW_DIAG(argument);
 #endif
+    close(sockfd);
 }
