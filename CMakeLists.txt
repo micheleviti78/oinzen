@@ -26,6 +26,7 @@ add_compile_options(-Wno-unused-parameter)
 add_compile_options(-fdata-sections -ffunction-sections)
 #begin Moreno
 add_compile_options(-I/${CMAKE_SOURCE_DIR}/lib/LwIP/src/include/compat/posix/)
+add_compile_options(-DTRACETASKS)
 #end Moreno
 set(LDSPECS nano.specs)
 
@@ -56,6 +57,7 @@ set(COMMON_SOURCE
 #begin Moreno
 	${CMAKE_SOURCE_DIR}/core/src/app/counter.c
 	${CMAKE_SOURCE_DIR}/core/src/app/tiny-httpd.c
+	${CMAKE_SOURCE_DIR}/core/src/app/ntp_client.c	
 #end Moreno
 	${CMAKE_SOURCE_DIR}/core/src/hw/ethernetif.c
 	${CMAKE_SOURCE_DIR}/core/src/hw/hal_msp.c
@@ -84,8 +86,12 @@ target_link_libraries(${PROJECT_NAME} hal)
 target_link_libraries(${PROJECT_NAME} printf)
 #target_link_libraries(${PROJECT_NAME} upy)
 
+set(OUTPUT_FILE scrap)
+set(INPUT_FILE scrap)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${ARM_SIZE_UTIL} --format=sysv ${PROJECT_NAME}.elf
+    COMMAND ${ARM_SIZE_UTIL} -x --format=sysv ${PROJECT_NAME}.elf
+# ${OUTPUT_FILE}
+#    COMMAND /bin/awk "'{if (NR<3) print $0; else printf \"%-20s%6d  0x%08X\\n\", $1, $2, $3}'" ${INPUT_FILE}
     COMMAND ${ARM_OBJCOPY} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
     )
     

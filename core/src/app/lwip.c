@@ -124,7 +124,7 @@ void MX_LWIP_Init(void)
   link_arg.netif = &gnetif;
   link_arg.semaphore = Netif_LinkSemaphore;
   /* Create the Ethernet link handler thread */
-/* USER CODE BEGIN OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+  /* USER CODE BEGIN OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
     /* Moreno: Begin */
     /* As in the Microchip example, the webserver (any any network related busyness) is
      controlled by LwIP by
@@ -135,7 +135,7 @@ void MX_LWIP_Init(void)
      stacksize: stack size in bytes for the new thread (may be ignored by ports)
      prio: priority of the new thread (may be ignored by ports)
      */
-    sys_thread_new("Tiny-HTTPD", tinyd, NULL, 1024, osPriorityAboveNormal);
+    sys_thread_new("Tiny-HTTPD", tinyd, NULL, 1024, osPriorityNormal);
     /* Moreno: End */
   osThreadDef(LinkThr, ethernetif_set_link, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate (osThread(LinkThr), &link_arg);

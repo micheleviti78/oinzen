@@ -50,9 +50,9 @@ extern void begin_count(struct counter *u);
 extern void end_count(struct counter *u);
 extern void reset_count(struct counter *u);
 #if 0
-extern void init_container(void);
+    extern void init_container(void);
 #else
-extern void q_init_container(struct counter *u);
+    extern void q_init_container(struct counter *u);
 #endif
 extern void init_counter(struct counter *c, char *name);
 extern void init_counter_StartDefaultTask(void);

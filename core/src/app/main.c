@@ -46,20 +46,22 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
         uint32_t endOf;
         // osDelay(1000);
         begin_count(&counter_Stupid);
-        endOf = (c & INT32_MAX);
-        while (c < 2*endOf+1) {
+        endOf = (c & INT16_MAX);
+        while (c < UINT16_MAX) {
             c++;
-            if (c == INT32_MAX){
-                c = 0;
-                break;
-            }
         };
+        c = 0;
         end_count(&counter_Stupid);
+        osDelay(3000);
+#if 0
         s++;
-        if (s == 60) {
+        if (s == 6000) {
             RAW_DIAG("[ LOG ] Stupid");
             s = 0;
         }
+#else
+        RAW_DIAG("[ LOG ] Stupid");
+#endif
     }
 }
 /**
@@ -92,6 +94,7 @@ int main(void)
   RAW_DIAG(" ");
   RAW_DIAG("Starting System");
   RAW_DIAG("Newlib version %d.%d.%d", __NEWLIB__,__NEWLIB_MINOR__,__NEWLIB_PATCHLEVEL__);
+  RAW_DIAG("CMSIS API version %d.%d", (osCMSIS>>16), (osCMSIS & 0xFFFF));
   RAW_DIAG("FreeRTOS version %d.%d.%d", tskKERNEL_VERSION_MAJOR, tskKERNEL_VERSION_MINOR, tskKERNEL_VERSION_BUILD);
   RAW_DIAG("LwIP version %d.%d.%d", LWIP_VERSION_MAJOR, LWIP_VERSION_MINOR, LWIP_VERSION_REVISION);
     
@@ -109,7 +112,7 @@ int main(void)
 #else
     init_counter(&counter_StartDefaultTask, "StartDefaultTask");
     init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
-    init_counter(&counter_tinyd, "Static HTTPD");
+    init_counter(&counter_tinyd, "Tiny-HTTPD");
 #endif
 
 #if STUPID

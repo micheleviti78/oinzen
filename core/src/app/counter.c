@@ -166,7 +166,7 @@ void init_counter(struct counter *c, char *name){
     
     return;
 }
-/* NOT NEEDED ANYMORE */
+/* <----- NOT NEEDED ANYMORE -----> */
 /* Task: StartDefaultTask */
 void init_counter_StartDefaultTask(void) {
     
@@ -200,6 +200,7 @@ void init_counter_ethernetif_set_link(void) {
     
     return;
 }
+/* ^----- NOT NEEDED ANYMORE -----^ */
 
 #if 1
 void vApplicationIdleHook( void )
@@ -215,21 +216,22 @@ void vApplicationIdleHook( void )
      memory allocated by the kernel to any task that has since been deleted. */
     
     static uint32_t _tick=0, _last_tick=0, _this_tick=0;
-    const uint32_t _n_seconds = 60;
+    const uint32_t _n_seconds = 3;
     const uint32_t _ticks_pause = 1000;
-    static const float _freq = 160000000; //(float) SystemCoreClock;
+    static const float _freq = 160000000.0f; //(float) SystemCoreClock;
     static const float _f_seconds = (float) _n_seconds;
     static const float _ratio = 100.0f/(_freq * _f_seconds);
-    char buf[128];
-    
+    static char buf[128];
+    static const char _log[] = "[ Logging ] every 3 s";
+#if 0
     sprintf(buf, "[ Logging ] every %lds", _n_seconds);
-
+#endif
     _this_tick = xTaskGetTickCount();
     _tick = _tick + (_this_tick - _last_tick);
     _last_tick = _this_tick;
-    
+
     if (_tick >= _n_seconds * _ticks_pause){
-        RAW_DIAG(log);
+        RAW_DIAG(_log);
         uint32_t i = 0;
         while (container[i] != NULL){
             
