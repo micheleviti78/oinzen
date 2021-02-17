@@ -26,12 +26,6 @@ struct counter {
 /* Aliasing */
 typedef struct counter counter;
 
-/* Counter structures for each task */
-enum task_counter {BEGIN=0,
-    STARTDEFAULTTASK,
-    ETHERNETIFSETLINK,
-    LAST};
-
 /* StartDefaultTask */
 struct counter counter_StartDefaultTask;
 /* ethernetif_set_link */
@@ -40,20 +34,21 @@ struct counter counter_ethernetif_set_link;
 struct counter counter_Stupid;
 /* tinyd */
 struct counter counter_tinyd;
+/* counter for thread EthIf */
+struct counter counter_EthIf;
 
 /* Container for all the struct counter */
 struct counter **container;
 
 /* Functions */
 extern uint32_t uDWTCounterEnable(void);
+extern uint32_t uDWTCounterReset(void);
 extern void begin_count(struct counter *u);
 extern void end_count(struct counter *u);
 extern void reset_count(struct counter *u);
-#if 0
-    extern void init_container(void);
-#else
-    extern void q_init_container(struct counter *u);
-#endif
 extern void init_counter(struct counter *c, char *name);
+
+#if 0
 extern void init_counter_StartDefaultTask(void);
 extern void init_counter_ethernetif_set_link(void);
+#endif

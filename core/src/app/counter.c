@@ -63,6 +63,12 @@ uint32_t uDWTCounterEnable(void) {
     return (DWT->CYCCNT);
 }
 
+uint32_t uDWTCounterReset(void){
+    
+    DWT->CYCCNT = 0;
+    return 1;
+}
+
 /*
  * Counting functions
  */
@@ -84,10 +90,11 @@ void end_count(struct counter *usage){
 
 void reset_count(struct counter *usage){
     
-    DWT->CYCCNT = 0;
-    usage->end = 0;
-    usage->begin = 0;
-    usage->total_usage = 0;
+    register uint32_t _z = 0x0;
+    
+    usage->end = _z;
+    usage->begin = _z;
+    usage->total_usage = _z;
     
     return;
 }
@@ -215,12 +222,12 @@ void vApplicationIdleHook( void )
      function, because it is the responsibility of the idle task to clean up
      memory allocated by the kernel to any task that has since been deleted. */
     
-    static uint32_t _tick=0, _last_tick=0, _this_tick=0;
+    static uint32_t _tick=0, _last_tick=0, _this_tick=0, _core=0;
     const uint32_t _n_seconds = 3;
     const uint32_t _ticks_pause = 1000;
-    static const float _freq = 160000000.0f; //(float) SystemCoreClock;
-    static const float _f_seconds = (float) _n_seconds;
-    static const float _ratio = 100.0f/(_freq * _f_seconds);
+    static float _freq = 160000000.0f; //(float) SystemCoreClock;
+    static float _f_seconds = (float) _n_seconds;
+    static float _ratio = .000000208333333333f; // 100.0f/(_freq * _f_seconds);
     static char buf[128];
     static const char _log[] = "[ Logging ] every 3 s";
 #if 0
@@ -229,17 +236,28 @@ void vApplicationIdleHook( void )
     _this_tick = xTaskGetTickCount();
     _tick = _tick + (_this_tick - _last_tick);
     _last_tick = _this_tick;
-
+    
+    if (_core == 0) {
+        _core = HAL_RCC_GetSysClockFreq();
+        _freq = (float) _core;
+        _ratio = 100.0f/(_freq * _f_seconds);
+    }
+    
     if (_tick >= _n_seconds * _ticks_pause){
         RAW_DIAG(_log);
         uint32_t i = 0;
         while (container[i] != NULL){
             
 #if 0
+            
             float _total_usage = 100.0f * (float) container[i]->total_usage/(_freq * _f_seconds);
+
 #else
+            
             float _total_usage = (float) container[i]->total_usage * _ratio;
+
 #endif
+            
             uint32_t _integer = (uint32_t) floorf(_total_usage);
             uint32_t _dec = (uint32_t) ((_total_usage - (float) _integer) * 100.0f);
             sprintf(buf, "%s: %lu.%lu", container[i]->task_name,
@@ -248,6 +266,7 @@ void vApplicationIdleHook( void )
             reset_count(container[i]);
             i++;
         }
+        uDWTCounterReset(); // we reset the counter to 0
         _tick = 0;
         return;
     }

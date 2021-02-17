@@ -51,7 +51,6 @@ void Stupid(void const * argument) /* Priority:: osPriorityNormal */
         c = 0;
         RAW_DIAG("[ LOG ] Stupid");
         end_count(&counter_Stupid);
-        
         osDelay(3000);
     }
 }
@@ -96,18 +95,14 @@ int main(void)
     else {
         RAW_DIAG("[ uDWTCounterEnable ] error ");
     }
-#if 0
-    init_counter_StartDefaultTask();
-    init_counter_ethernetif_set_link();
-    init_container(); // Container of all data structure for counting clocks
-#else
-    init_counter(&counter_StartDefaultTask, "StartDefaultTask");
-    init_counter(&counter_ethernetif_set_link, "ethernetif_set_link");
+    /* Init the counters */
+    init_counter(&counter_StartDefaultTask, "defaultTask"); // as in osThread
+    init_counter(&counter_ethernetif_set_link, "LinkThr"); // as in osThread ethernetif_set_link;
+    init_counter(&counter_EthIf, "EthIf");
     init_counter(&counter_tinyd, "Tiny-HTTPD");
-#endif
 
 #if STUPID
-    init_counter(&counter_Stupid, "Stupid");
+    init_counter(&counter_Stupid, "stupidThread");
     /*
      #define. osThreadDef(name, function, priority, instances, stacksz)
      Create a Thread Definition with function, priority, and stack requirements.

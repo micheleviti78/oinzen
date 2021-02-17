@@ -1,2 +1,6 @@
+\Moreno: 20210215
+httpd on port 9999
 \Moreno: 20210216
 Added def TRACETASKS to be able to use void vTaskList( char *pcWriteBuffer ); 
+\Moreno: 20120217
+Added new counter, fixed few functions. TODO: counter in webpage.

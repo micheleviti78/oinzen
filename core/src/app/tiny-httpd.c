@@ -536,8 +536,15 @@ void tinyd(void *argument)
 		else {
             /* add counter */
             begin_count(&counter_tinyd);
+            {
+                volatile uint32_t _q = 0;
+                while (_q < UINT16_MAX<<1) _q++;
+            }
 			accept_request(client_sock);
             end_count(&counter_tinyd);
+#if 0
+            RAW_DIAG("[ LOG ] counter_tinyd begin %d end %d", counter_tinyd.begin, counter_tinyd.end);
+#endif
 		}
 	}
 	/*

@@ -30,6 +30,8 @@
 #include <string.h>
 #include "cmsis_os.h"
 #include "lwip/tcpip.h"
+/* Moreno */
+#include "counter.h"
 
 /* Private define ------------------------------------------------------------*/
 /* The time to block waiting for input. */
@@ -427,6 +429,11 @@ void ethernetif_input(void const * argument)
 
   for( ;; )
   {
+      
+#if 1
+    /* Add counter */
+    begin_count(&counter_EthIf);
+#endif
     if (osSemaphoreWait(s_xSemaphore, TIME_WAITING_FOR_INPUT) == osOK)
     {
       do
@@ -443,6 +450,13 @@ void ethernetif_input(void const * argument)
         UNLOCK_TCPIP_CORE();
       } while(p!=NULL);
     }
+#if 1
+    /* Add end counter */
+    end_count(&counter_EthIf);
+#if 0
+      RAW_DIAG("[ LOG ] counter_EthIf total %lu", counter_EthIf.total_usage);
+#endif // RAW_DIAG
+#endif // Counter
   }
 }
 
