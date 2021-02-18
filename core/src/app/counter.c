@@ -92,8 +92,8 @@ void reset_count(struct counter *usage){
     
     register uint32_t _z = 0x0;
     
-    usage->end = _z;
     usage->begin = _z;
+    usage->end = _z;
     usage->total_usage = _z;
     
     return;
@@ -166,7 +166,7 @@ void init_counter(struct counter *c, char *name){
     while (name[i] != '\0'){ // equivalent to strcpy
         c->task_name[i] = name[i];
         i++;
-        if (i == 63) break;
+        if (i == 63) break; // check for overboard
     }
     c->task_name[i] = '\0';
     init_container(c);

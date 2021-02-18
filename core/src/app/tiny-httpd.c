@@ -57,14 +57,16 @@ void serve_index(int);
  * return.  Process the request appropriately.
  * Parameters: the socket connected to the client */
 /**********************************************************************/
-int32_t isSpace(char c){ /* RETURN 1 IF THE CHAR IS NOT ALPHA-NUMERIC */
-
-	if      (c ==  ' ') return 1;
-	else if (c == '\f') return 1;
-	else if (c == '\n') return 1;
-	else if (c == '\r') return 1;
-	else if (c == '\t') return 1;
-	else if (c == '\v') return 1;
+int32_t isSpace(char c){
+    /* RETURN 1 IF THE CHAR IS NOT ALPHA-NUMERIC */
+    register char _c = c;
+    
+    if      (_c ==  ' ') return 1;
+	else if (_c == '\f') return 1;
+	else if (_c == '\n') return 1;
+	else if (_c == '\r') return 1;
+	else if (_c == '\t') return 1;
+	else if (_c == '\v') return 1;
 
 	return 0;
 }

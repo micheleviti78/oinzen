@@ -80,10 +80,10 @@ void ntp_client(void *argument)
 #else
     ntp_packet packet;
     {
-        uint32_t *_p = (uint32_t*) &packet;
+        register uint32_t *_p = (uint32_t*) &packet;
         register uint32_t _z = 0x0;
-        for (uint32_t i=0; i< (48>2); i++){
-            _p[i] = _z;
+        for (uint32_t i=0; i<12; i++){
+            *_p++ = _z;
         }
     }
 #endif
