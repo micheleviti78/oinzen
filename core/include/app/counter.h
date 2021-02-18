@@ -14,6 +14,7 @@
  *
  */
 
+
 /* Variable definition */
 /* Counter structure */
 struct counter {
@@ -22,6 +23,8 @@ struct counter {
     uint32_t total_usage;
     char task_name[64];
 };
+
+uint32_t number_of_counters;
 
 /* Aliasing */
 typedef struct counter counter;
@@ -36,9 +39,14 @@ struct counter counter_Stupid;
 struct counter counter_tinyd;
 /* counter for thread EthIf */
 struct counter counter_EthIf;
+/* counter for thread tcpip_thread */
+struct counter counter_tcpip_thread;
 
 /* Container for all the struct counter */
 struct counter **container;
+/* Parallel container to be used and shown on the web page*/
+#define LENGTHOFWEBCONTAINER 64
+char **web_container;
 
 /* Functions */
 extern uint32_t uDWTCounterEnable(void);

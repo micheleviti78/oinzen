@@ -77,8 +77,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
+#if 0
+    /* from analysis of tasks memory usage, this one uses almost 0 stack memory,
+     therefore can be shriked to 512 */
+    osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
+#else
+    osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512);
+#endif
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   RAW_DIAG(" ");
@@ -96,10 +101,12 @@ int main(void)
         RAW_DIAG("[ uDWTCounterEnable ] error ");
     }
     /* Init the counters */
+    number_of_counters = 0;
     init_counter(&counter_StartDefaultTask, "defaultTask"); // as in osThread
     init_counter(&counter_ethernetif_set_link, "LinkThr"); // as in osThread ethernetif_set_link;
     init_counter(&counter_EthIf, "EthIf");
     init_counter(&counter_tinyd, "Tiny-HTTPD");
+    init_counter(&counter_tcpip_thread, "tcpip_thread");
 
 #if STUPID
     init_counter(&counter_Stupid, "stupidThread");
@@ -107,7 +114,7 @@ int main(void)
      #define. osThreadDef(name, function, priority, instances, stacksz)
      Create a Thread Definition with function, priority, and stack requirements.
      */
-    osThreadDef(stupidThread, Stupid, osPriorityBelowNormal, 0, 4096);
+    osThreadDef(stupidThread, Stupid, osPriorityBelowNormal, 0, 512);
     stupidHandle = osThreadCreate(osThread(stupidThread), NULL);
 #endif // STUPID
     /* Done */

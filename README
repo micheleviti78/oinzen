@@ -4,3 +4,5 @@ httpd on port 9999
 Added def TRACETASKS to be able to use void vTaskList( char *pcWriteBuffer ); 
 \Moreno: 20120217
 Added new counter, fixed few functions. TODO: counter in webpage.
+\Moreno: 20210218
+A semaphore for the httpd should be added to be on the safe side. On this, I am not too confident.

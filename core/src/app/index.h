@@ -1,4 +1,4 @@
-static const char index_head[] = "<!DOCTYPE html><html><head><meta http-equiv=""Content-Type""content=""text/html; charset=utf-8""/><title>STM32F746DISCO</title></head>";
+static const char index_head[] = "<!DOCTYPE html><html><head><meta http-equiv=""Content-Type""content=""text/html;charset=utf-8""/><title>STM32F746DISCO</title></head>";
 static const char index_body[] = "<body><!-- Feel free to change this text here -->";
 #if 0
     static const char index_1[] = "<!DOCTYPE html>";
@@ -12,6 +12,7 @@ static const char index_body[] = "<body><!-- Feel free to change this text here 
 
 static const char index_9[] = "<p>Oinzen Oinzen AG</p>";
 static const char index_13[] = "<p>Jedi Master: Viti Michele, PhD, Software Engineer</p>";
+static const char index_end[] = "</body></html>";
 static const char index_15[] = "</body></html>";
 static const char index_ebody[] = "</body>";
 static const char index_par[] = "<p>";

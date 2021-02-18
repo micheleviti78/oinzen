@@ -278,15 +278,30 @@ void serve_index(int client){
     size_t size_of_out = 0;
     static const char Agent[] = "USER-AGENT";
 	static const char OFFSET = 'a' - 'A';
-	static const char _begin[] = "<p>";
-	static const char _end[] = "</p>";
+    static const char _end[] = "</p>";
+#if 0
+    static const char _begin[] = "<p>";
 	static const char _user[] = "User-Agent: ";
-    static char buf[256];
-	static char _out[256];
-    static char _tasks_buf[512];
+#else
+    static const char _user[] = "<p> User-Agent: ";
+#endif
+    static const char _time[] = "<p>Time: ";
+#include "index.h"
+#if 0
+    static const char msg_0[] = "HTTP/1.0 200 OK\r\n";
+    static const char msg_1[] = SERVER_STRING;
+    static const char msg_2[] = "Content-Type: text/html\r\n";
+    static const char msg_3[] = "\r\n";
+#endif
+    static const char _header[] =
+    "HTTP/1.0 200 OK\r\nServer: J. David's webserver httpd/0.1.0\r\nContent-Type: text/html\r\n\r\n";
+    
+    static char buf[256] = {0};
+    static char _out[256] = {0};
+    static char _tasks_buf[512] = {0};
 
 #ifdef DEBUG
-	static char _err[512];
+    static char _err[512] = {0};
 #endif //DEBUG
 
 	buf[0] = 'A';
@@ -302,14 +317,14 @@ void serve_index(int client){
 
 #endif // DEBUG
 
-		char *q = &buf[0];
+		char *_q = &buf[0];
         /* We raise any buf beginning with u or U to catch User-Agent string
          to be used as example
          */
-		if ((*q == 'u') || (*q == 'U')) {
+		if ((*_q == 'u') || (*_q == 'U')) {
 			for (uint32_t i=0; i < STRLEN( Agent ); i++) {
-				*q = (*q >= 'a' && *q <= 'z') ? *q -= OFFSET : *q;
-				q++;
+				*_q = (*_q >= 'a' && *_q <= 'z') ? *_q -= OFFSET : *_q;
+				_q++;
 			}
 
 #ifdef DEBUG
@@ -322,11 +337,7 @@ void serve_index(int client){
 		} // END while
 
 		if (strncmp(Agent, buf, STRLEN( Agent )) == 0) {
-			/*
-			 printf("strcmp %d \n", strncmp(Agent, buf, STRLEN( Agent )));
-			 s_len = sprintf(out, "<p> User-Agent: %s </p>",     &buf[STRLEN( Agent )+2]);
-			 printf("%s \n", out);
-			 */
+    
 #ifdef DEBUG
 
             RAW_DIAG("%s\n", buf);
@@ -352,15 +363,6 @@ void serve_index(int client){
 
 	RAW_DIAG("[ LOG ] serve_index buf %s", buf);
 
-#include "index.h"
-#if 0
-	static const char msg_0[] = "HTTP/1.0 200 OK\r\n";
-	static const char msg_1[] = SERVER_STRING;
-	static const char msg_2[] = "Content-Type: text/html\r\n";
-	static const char msg_3[] = "\r\n";
-#endif
-    static const char _header[] =
-        "HTTP/1.0 200 OK\r\nServer: J. David's webserver httpd/0.1.0\r\nContent-Type: text/html\r\n\r\n";
 	/* Sending Header */
 #if 0
 	send(client, msg_0, STRLEN(msg_0), 0);
@@ -387,21 +389,38 @@ void serve_index(int client){
 #endif
 
     /* sending the User-Agent: can be simplified */
+#if 0
 	send(client, _begin, STRLEN( _begin ), 0);
+#endif
 	send(client, _user, STRLEN( _user ), 0);
 	send(client, _out, size_of_out, 0);
 	send(client, _end, STRLEN( _end ), 0);
     
-    /* Reset _out */
+    /* Reset _out to be ready for  */
     {
-        uint32_t *_p = (uint32_t*) &_out[0];
-        for (uint32_t i=0; i < (256>>2); i++){
-            register uint32_t _z = 0;
+        uint32_t i=0;
+        uint32_t _start_stream;
+        // static const char _time[] = "<p>Time: ";
+        
+        for (;i < sizeof(_time); i++) {
+            _out[i] = _time[i];
+        }
+        _start_stream = i;
+        --_start_stream;
+        
+        uint8_t *_p = (uint8_t*) &_out[i];
+        register uint8_t _z = 0;
+        for (; i < sizeof(_out)-sizeof(index_epar); i++){
             _p[i] = _z;
         }
-    }
-    ntp_client((void*) _out);
 
+        for (; i < sizeof(_out); i++){
+            uint8_t *_t = (uint8_t *) &index_epar;
+            _p[i] = *_t++;
+        }
+
+        ntp_client((void*) &_out[_start_stream]); /* the date is written in _out */
+    }
 #ifdef TRACETASKS
 
 /* void vTaskList( char *pcWriteBuffer );
@@ -418,15 +437,15 @@ void serve_index(int client){
     {
         uint32_t *_p = (uint32_t*) &_tasks_buf[0];
         register uint32_t _z = 0x0;
-        for (uint32_t i=0; i<(512>>2); i++){
+        for (uint32_t i=0; i<128; i++){
             /* shift to assembly or pipeline */
             _p[i] = _z;
         }
     }
-    static const char _pre[] = "<pre>";
-    static const char _epre[] = "</pre>";
-    static const char _head[] = "Name            State   Prio.   Stack   Num\n";
-    static const char _legend[] = "B - Blocked R - Ready D - Deleted (waiting clean up) S - Suspended, or Blocked without a timeout\n</pre>\n";
+    //static const char _pre[] = "<pre>";
+    // Not needed: static const char _epre[] = "</pre>";
+    static const char _head[] = "<pre>Name            State   Prio.   Stack   Num\n";
+    static const char _legend[] = "B - Blocked R - Ready D - Deleted (waiting clean up)\nS - Suspended, or Blocked without a timeout\n</pre>\n";
     vTaskList(_tasks_buf);
     
 #ifdef DEBUG
@@ -436,7 +455,7 @@ void serve_index(int client){
     
 #endif // DEBUG
     
-    SEND(_pre);
+//    SEND(_pre);
     SEND(_head);
     SEND(_tasks_buf);
     SEND(_legend);
@@ -445,22 +464,30 @@ void serve_index(int client){
 
     /* <---------> */
 	SEND( index_13 );
+    /* Writing the current cpu usage */
+    if (web_container != NULL) {
+        static const char _table[] = "<table style=""width:20%""><tr><th>Task Name</th><th>Usage</th></tr>";
+        SEND( _table );
+        for (uint32_t i=0; i < number_of_counters; i++){
+            send(client, web_container[i], LENGTHOFWEBCONTAINER, 0);
+        }
+        static const char _end_of_table[] = "</table>";
+        SEND ( _end_of_table );
+    }
+    /* writing date _out[256] */
     SEND( _out );
-	SEND( index_15 );
+    
+    /* closing file*/
+	SEND( index_end );
     
 	return;
 }
 
-
 /**********************************************************************/
 
-#if 0
-int main(void)
-#else
 void tinyd(void *argument)
-#endif
 {
-	uint32_t port = SERVER_PORT;
+	const uint32_t port = SERVER_PORT;
 	int client_sock = -1;
 	struct sockaddr_in client_name;
 	int client_name_len = sizeof(client_name);

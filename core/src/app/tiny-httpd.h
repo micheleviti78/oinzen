@@ -1,1 +1,1 @@
-extern void tinyd( const void * );
+extern void tinyd( void * );

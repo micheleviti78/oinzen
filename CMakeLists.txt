@@ -14,7 +14,7 @@ endif()
 
 set(LDSCRIPT ${CMAKE_SOURCE_DIR}/STM32F746NGHx_FLASH.ld)
 
-set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/core/include/conf)
+set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/core/include/conf ${CMAKE_SOURCE_DIR}/core/include/app)
 
 enable_language(C CXX ASM)
 

@@ -52,15 +52,13 @@ uint32_t uDWTCounterEnable(void) {
     /* Reset counter */
     DWT->CYCCNT = 0;
     
-    /* Check if DWT has started */
-    _c = DWT->CYCCNT;
-    
     /* 2 dummys */
     __ASM volatile ("NOP");
     __ASM volatile ("NOP");
-    
+    /* Check if DWT has started */
+    _c = DWT->CYCCNT;
     /* Return difference, if result is zero, DWT has not started */
-    return (DWT->CYCCNT);
+    return (_c);
 }
 
 uint32_t uDWTCounterReset(void){
@@ -132,7 +130,6 @@ void init_container(struct counter *c){
     
     if (*container == NULL) {
         *container = (struct counter*) calloc(sizeof(struct counter*), _minimum_size);
-        
         if (*container == NULL){
             RAW_DIAG("[ ERROR ] init_container");
             while (1) {};
@@ -144,12 +141,10 @@ void init_container(struct counter *c){
         _minimum_size = 2*_minimum_size;
         *container = (struct counter*) realloc(*container, sizeof(struct counter*) * _minimum_size);
     }
-    /*
-     name one container for each task:
-     we have 2 tasks for the moment
-     */
+    
     container[_last] = c;
     _last++;
+    number_of_counters++;
     container[_last] = NULL;
     
     return;
@@ -222,7 +217,9 @@ void vApplicationIdleHook( void )
      function, because it is the responsibility of the idle task to clean up
      memory allocated by the kernel to any task that has since been deleted. */
     
-    static uint32_t _tick=0, _last_tick=0, _this_tick=0, _core=0;
+    static uint32_t _tick=0, _last_tick=0, _this_tick=0;
+    static uint32_t _core=0, _web_counter=0;
+    size_t _length_of_buf;
     const uint32_t _n_seconds = 3;
     const uint32_t _ticks_pause = 1000;
     static float _freq = 160000000.0f; //(float) SystemCoreClock;
@@ -243,6 +240,14 @@ void vApplicationIdleHook( void )
         _ratio = 100.0f/(_freq * _f_seconds);
     }
     
+    if (_web_counter == 0) {
+        web_container = (char**) calloc(sizeof(char*), number_of_counters);
+        for (uint32_t i=0 ; i<number_of_counters; i++){
+            web_container[i] = (char*) calloc(sizeof(char*), LENGTHOFWEBCONTAINER);
+        }
+        _web_counter = 1;
+    }
+    
     if (_tick >= _n_seconds * _ticks_pause){
         RAW_DIAG(_log);
         uint32_t i = 0;
@@ -257,12 +262,21 @@ void vApplicationIdleHook( void )
             float _total_usage = (float) container[i]->total_usage * _ratio;
 
 #endif
-            
+
             uint32_t _integer = (uint32_t) floorf(_total_usage);
             uint32_t _dec = (uint32_t) ((_total_usage - (float) _integer) * 100.0f);
-            sprintf(buf, "%s: %lu.%lu", container[i]->task_name,
+#if 0
+            _length_of_buf = sprintf(buf, "%s: %lu.%lu", container[i]->task_name,
                     _integer, _dec);
-            RAW_DIAG(buf);
+            _length_of_buf = snprintf(web_container[i], _length_of_buf+8, "<p>%s</p>", buf);
+#else
+            _length_of_buf = sprintf(web_container[i], "<tr><td>%s</td><td>%lu.%lu</td></tr>",
+                                     container[i]->task_name, _integer, _dec);
+#endif
+            for (; _length_of_buf < 64; _length_of_buf++) {
+                web_container[i][_length_of_buf] = '\0';
+            }
+            // RAW_DIAG(web_container[i]);
             reset_count(container[i]);
             i++;
         }

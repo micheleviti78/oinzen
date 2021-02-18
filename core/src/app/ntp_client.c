@@ -29,6 +29,9 @@
 #include "lwip.h"
 /* For printf */
 #include "diag.h"
+/* for whateverelse */
+#include "main.h"
+
 static const char servers[4][18] ={"0.de.pool.ntp.org",
                                   "1.de.pool.ntp.org",
                                   "2.de.pool.ntp.org",
@@ -39,8 +42,7 @@ void ntp_client(void *argument)
   int32_t sockfd, n; // Socket file descriptor and the n return result from writing/reading from the socket.
   const uint32_t portno = 123; // NTP UDP port number.
   const uint32_t _fuse = 3600; // the time is in UT, we add 3600 seconds
-  // char host_name[] = "us.pool.ntp.org"; // NTP server host-name.
-  struct sockaddr_in serv_addr; // Server address data structure.
+  static struct sockaddr_in serv_addr = {0}; // Server address data structure.
   struct hostent *server;      // Server data structure.
 
   // Structure that defines the 48 byte NTP packet protocol.
@@ -78,14 +80,16 @@ void ntp_client(void *argument)
   ntp_packet packet = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   memset( &packet, 0, sizeof( ntp_packet ) );
 #else
-    ntp_packet packet;
+    static ntp_packet packet = {0};
+/* Using static, packet goes in .bss and initialized to zero.
     {
-        register uint32_t *_p = (uint32_t*) &packet;
-        register uint32_t _z = 0x0;
+        uint32_t *_p = (uint32_t*) &packet;
+        register const uint32_t _z = 0x0;
         for (uint32_t i=0; i<12; i++){
             *_p++ = _z;
         }
     }
+*/
 #endif
   // Set the first byte's bits to 00,011,011 for li = 0, vn = 3, and mode = 3. The rest will be left set to zero.
   *((char *) &packet + 0) = 0x1b; // Represents 27 in base 10 or 00011011 in base 2.
@@ -109,8 +113,9 @@ void ntp_client(void *argument)
     }
 
   // Zero out the server address structure.
-  bzero((char*) &serv_addr, sizeof(serv_addr));
-
+  /* initialized at zero because static
+   bzero((char*) &serv_addr, sizeof(serv_addr));
+  */
   serv_addr.sin_family = AF_INET;
 
   // Copy the server's IP address to the server address structure.
@@ -151,7 +156,21 @@ void ntp_client(void *argument)
   time_t txTm = (time_t) ( packet.txTm_s - NTP_TIMESTAMP_DELTA + _fuse);
 
   // Print the time we got from the server, accounting for local timezone and conversion from UTC time.
+  //   uint32_t _beg = DWT->CYCCNT;
+#if 0
+ /* approx 8K clocks */
   sprintf((char*) argument, "<p>Time: %s</p>", ctime((const time_t*) &txTm));
+#else
+    /* 6.5K clocks and no malloc */
+    ctime_r((const time_t*) &txTm, argument);
+#endif
+   /*
+   uint32_t _end = DWT->CYCCNT;
+    _end -= _beg;
+    char _qaz[16];
+    sprintf(_qaz, "%lu", _end);
+    RAW_DIAG(_qaz);
+   */
 #ifdef DEBUG
   RAW_DIAG(argument);
 #endif

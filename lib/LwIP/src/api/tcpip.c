@@ -50,6 +50,10 @@
 #include "lwip/etharp.h"
 #include "netif/ethernet.h"
 
+/* <--- Moreno ---> */
+#include "counter.h"
+/* ^--- Moreno ---^ */
+
 #define TCPIP_MSG_VAR_REF(name)     API_VAR_REF(name)
 #define TCPIP_MSG_VAR_DECLARE(name) API_VAR_DECLARE(struct tcpip_msg, name)
 #define TCPIP_MSG_VAR_ALLOC(name)   API_VAR_ALLOC(struct tcpip_msg, MEMP_TCPIP_MSG_API, name, ERR_MEM)
@@ -137,6 +141,8 @@ tcpip_thread(void *arg)
   }
 
   while (1) {                          /* MAIN Loop */
+      /* Begin counter here */
+      begin_count(&counter_tcpip_thread);
     LWIP_TCPIP_THREAD_ALIVE();
     /* wait for a message, timeouts are processed while waiting */
     TCPIP_MBOX_FETCH(&tcpip_mbox, (void **)&msg);
@@ -146,6 +152,8 @@ tcpip_thread(void *arg)
       continue;
     }
     tcpip_thread_handle_msg(msg);
+      /* End counter here */
+      end_count(&counter_tcpip_thread);
   }
 }
 
